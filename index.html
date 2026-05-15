@@ -783,22 +783,14 @@ function drawDayBG(){
   // ── BRIGADE 228 FLAG (right side) ────────────────────────────
   const fx2=GW-130, fy3=80, fw2=110, fh2=75;
   cx.fillStyle='#888'; cx.fillRect(fx2-3,fy3-10,4,GND-fy3+10);
-  // Orange + black flag (tiger brigade colors)
-  cx.fillStyle='#c85a00'; cx.fillRect(fx2,fy3,fw2,fh2);
-  cx.fillStyle='#1a0a00'; cx.fillRect(fx2,fy3,fw2,fh2/2);
-  // Tiger silhouette stripes
-  cx.fillStyle='rgba(255,140,0,0.6)';
-  for(let i=0;i<4;i++) cx.fillRect(fx2+12+i*22,fy3+5,8,fh2/2-10);
-  // Text "חטיבה 228"
-  cx.fillStyle='#fff'; cx.font='bold 9px Arial'; cx.textAlign='center'; cx.direction='rtl';
-  cx.fillText('חטיבה',fx2+fw2/2,fy3+fh2/2+16);
-  cx.fillText('228',fx2+fw2/2,fy3+fh2/2+28);
-  // Tiger text
-  cx.fillStyle='#ffaa44'; cx.font='bold 8px Arial';
-  cx.fillText('🐯 הנמרים',fx2+fw2/2,fy3+14);
+  // White background
+  cx.fillStyle='#fff'; cx.fillRect(fx2,fy3,fw2,fh2);
+  // Green text "חטיבה 228"
+  cx.fillStyle='#006600'; cx.font='bold 18px Arial'; cx.textAlign='center'; cx.direction='rtl';
+  cx.fillText('חטיבה 228',fx2+fw2/2,fy3+fh2/2+7);
   cx.direction='ltr'; cx.textAlign='left';
   // Flag border
-  cx.strokeStyle='#5a2a00'; cx.lineWidth=2; cx.strokeRect(fx2,fy3,fw2,fh2);
+  cx.strokeStyle='#aaa'; cx.lineWidth=2; cx.strokeRect(fx2,fy3,fw2,fh2);
 
   // Ground (green grass)
   const g=cx.createLinearGradient(0,GND,0,GH);
@@ -1350,7 +1342,7 @@ function loop(){
       if(P.inv>0&&P.inv%6<3) cx.globalAlpha=0.3;
       drawSoldier(P.x+P.w/2,P.y+P.h,P.face,P.state,P.fr,false);
       cx.globalAlpha=1;
-      if(P.spT>0) speech(P.x+P.w/2,P.y,P.spTx);
+      if(P.spT>0) speech(P.x+P.w/2,P.y-85,P.spTx);
       drawParts(); drawHUD();
     } else if(GS==='bossIntro'){
       drawBG();
@@ -1364,11 +1356,11 @@ function loop(){
       drawBG(); updPlayer(); updBoss(); updBullets(); updParts();
       BOSS.bullets.forEach(drawBullet); bullets.forEach(drawBullet);
       drawBossSprite(BOSS.x+BOSS.w/2,BOSS.y+BOSS.h,BOSS.face);
-      if(BOSS.spT>0) speech(BOSS.x+BOSS.w/2,BOSS.y,BOSS.spTx);
+      if(BOSS.spT>0) speech(BOSS.x+BOSS.w/2,BOSS.y-100,BOSS.spTx);
       if(P.inv>0&&P.inv%6<3) cx.globalAlpha=0.3;
       drawSoldier(P.x+P.w/2,P.y+P.h,P.face,P.state,P.fr,false);
       cx.globalAlpha=1;
-      if(P.spT>0) speech(P.x+P.w/2,P.y,P.spTx);
+      if(P.spT>0) speech(P.x+P.w/2,P.y-85,P.spTx);
       drawParts(); drawHUD(); drawBossHUD();
     } else if(GS==='boss2intro'){
       drawDayBG();
@@ -1382,11 +1374,11 @@ function loop(){
       drawDayBG(); updPlayer(); updBoss2(); updBullets(); updParts();
       BOSS2.bullets.forEach(drawCoupon); bullets.forEach(drawBullet);
       drawBoss2Sprite(BOSS2.x+BOSS2.w/2,BOSS2.y+BOSS2.h,BOSS2.face);
-      if(BOSS2.spT>0) speech(BOSS2.x+BOSS2.w/2,BOSS2.y,BOSS2.spTx);
+      if(BOSS2.spT>0) speech(BOSS2.x+BOSS2.w/2,BOSS2.y-110,BOSS2.spTx);
       if(P.inv>0&&P.inv%6<3) cx.globalAlpha=0.3;
       drawSoldier(P.x+P.w/2,P.y+P.h,P.face,P.state,P.fr,false);
       cx.globalAlpha=1;
-      if(P.spT>0) speech(P.x+P.w/2,P.y,P.spTx);
+      if(P.spT>0) speech(P.x+P.w/2,P.y-85,P.spTx);
       drawParts(); drawHUD(); drawBoss2HUD();
     } else if(GS==='gameover'){
       drawBG(); updParts(); drawParts(); drawGO();
