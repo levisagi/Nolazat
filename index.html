@@ -153,7 +153,7 @@ const PLATS=[
 // ═══════════════════════════════════════════════════════════════
 let GS='menu', SC=0, LZ=0, LV=1, lives=5, FC=0, diff=1;
 let bullets=[], enemies=[], cols=[], parts=[];
-let bossHp=30, bossMaxHp=30, plrBossHp=10, bossIntroT=0;
+let bossHp=15, bossMaxHp=15, plrBossHp=20, bossIntroT=0;
 let eSpawnT=0, cSpawnT=0;
 
 const SPEECHES=[
@@ -693,10 +693,10 @@ function drawBossHUD(){
   const pw=160,px=GW/2-80;
   cx.fillStyle='rgba(0,0,0,0.5)'; cx.fillRect(px-2,GND-34,pw+4,18);
   cx.fillStyle='#003300'; cx.fillRect(px,GND-32,pw,14);
-  cx.fillStyle='#00ff44'; cx.fillRect(px,GND-32,pw*(plrBossHp/10),14);
+  cx.fillStyle='#00ff44'; cx.fillRect(px,GND-32,pw*(plrBossHp/20),14);
   cx.strokeStyle='#00cc33'; cx.lineWidth=1; cx.strokeRect(px,GND-32,pw,14);
   cx.fillStyle='#fff'; cx.font='bold 9px Arial'; cx.textAlign='center';
-  cx.fillText('♥ '+plrBossHp+'/10',GW/2,GND-23); cx.textAlign='left';
+  cx.fillText('♥ '+plrBossHp+'/20',GW/2,GND-23); cx.textAlign='left';
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -866,7 +866,7 @@ function updCols(){
 // ═══════════════════════════════════════════════════════════════
 function initBoss(){
   BOSS.x=GW/2-BOSS.w/2; BOSS.y=GND-BOSS.h; BOSS.vx=2.5; BOSS.vy=0;
-  BOSS.bullets=[]; BOSS.sCD=80; bossHp=bossMaxHp; plrBossHp=10;
+  BOSS.bullets=[]; BOSS.sCD=80; bossHp=bossMaxHp; plrBossHp=20;
   BOSS.spTx='אוררר אני אחסל אותך!'; BOSS.spT=260;
   setTimeout(()=>{P.spTx='אנההה לא לזעתתתת!!!!';P.spT=220;},1800);
 }
@@ -880,9 +880,9 @@ function updBoss(){
   BOSS.sCD--;
   if(BOSS.sCD<=0){
     const dx=(P.x+P.w/2)-(BOSS.x+BOSS.w/2),dy=(P.y+P.h/2)-(BOSS.y+BOSS.h/2);
-    const d=Math.hypot(dx,dy),sp=4.5+diff*0.6;
-    BOSS.bullets.push({x:BOSS.x+BOSS.w/2,y:BOSS.y+BOSS.h/2-30,vx:(dx/d)*sp,vy:(dy/d)*sp,r:13,boss:true});
-    BOSS.sCD=Math.max(28,85-diff*12); sfxShoot();
+    const d=Math.hypot(dx,dy),sp=2.8+diff*0.3;
+    BOSS.bullets.push({x:BOSS.x+BOSS.w/2,y:BOSS.y+BOSS.h/2-30,vx:(dx/d)*sp,vy:(dy/d)*sp,r:11,boss:true});
+    BOSS.sCD=Math.max(55,130-diff*10); sfxShoot();
   }
   BOSS.bullets=BOSS.bullets.filter(b=>{
     b.x+=b.vx; b.y+=b.vy;
@@ -983,7 +983,7 @@ function drawBossIntro(){
 function startGame(){
   GS='playing'; SC=0; LZ=0; LV=1; lives=5; diff=1;
   bullets=[]; enemies=[]; cols=[]; parts=[]; BOSS.bullets=[];
-  plrBossHp=10; eSpawnT=0; cSpawnT=0;
+  plrBossHp=20; eSpawnT=0; cSpawnT=0;
   P.x=GW/2-P.w/2; P.y=GND-P.h-5; P.vx=0; P.vy=0;
   P.inv=0; P.sCD=0; P.spT=80; P.spTx='לא לזעתתתתת!!!'; P.face=1;
   spawnCol(); startBG();
