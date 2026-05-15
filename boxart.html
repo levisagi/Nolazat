@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="UTF-8">
+<title>לא לזעת! – Game Box Art A4</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#0a0a0a;display:flex;flex-direction:column;align-items:center;padding:24px;min-height:100vh;font-family:Arial,sans-serif;}
+canvas{display:block;max-width:100%;box-shadow:0 0 60px rgba(0,255,80,0.35),0 20px 80px rgba(0,0,0,0.9);}
+.dl{margin-top:18px;padding:14px 36px;background:linear-gradient(135deg,#00cc44,#007722);color:#fff;font:bold 17px monospace;border:none;border-radius:8px;cursor:pointer;letter-spacing:1px;}
+.dl:hover{background:linear-gradient(135deg,#00ff55,#00aa33);}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<button class="dl" onclick="save()">💾 הורד PNG</button>
+<script>
+const W=794,H=1123;
+const cv=document.getElementById('c');
+cv.width=W; cv.height=H;
+cv.style.width=Math.min(W,window.innerWidth-48)+'px';
+const cx=cv.getContext('2d');
+
+function save(){const a=document.createElement('a');a.download='לא-לזעת-boxart-A4.png';a.href=cv.toDataURL('image/png');a.click();}
+
+// ── helpers ──────────────────────────────────────────────────
+function rr(x,y,w,h,r=8,fill=true){cx.beginPath();cx.roundRect?cx.roundRect(x,y,w,h,r):cx.rect(x,y,w,h);fill?cx.fill():cx.stroke();}
+function star(x,y,r1,r2,pts,col){
+  cx.fillStyle=col; cx.beginPath();
+  for(let i=0;i<pts*2;i++){const a=i*Math.PI/pts-Math.PI/2,r=i%2===0?r1:r2;
+    i===0?cx.moveTo(x+Math.cos(a)*r,y+Math.sin(a)*r):cx.lineTo(x+Math.cos(a)*r,y+Math.sin(a)*r);}
+  cx.closePath(); cx.fill();
+}
+function outline(fn,col='#000',lw=4){cx.save();cx.strokeStyle=col;cx.lineWidth=lw;fn();cx.stroke();cx.restore();}
+
+// ── FLAG ISRAEL ───────────────────────────────────────────────
+function flagIsrael(x,y,w,h){
+  cx.fillStyle='#fff'; rr(x,y,w,h,2);
+  cx.fillStyle='#0038b8';
+  cx.fillRect(x,y+h*.14,w,h*.16); cx.fillRect(x,y+h*.7,w,h*.16);
+  const sx=x+w/2,sy=y+h/2,sr=h*.19;
+  cx.fillStyle='#0038b8'; cx.beginPath();
+  for(let i=0;i<6;i++){const a=i/6*Math.PI*2-Math.PI/2,r=i%2===0?sr:sr*.5;
+    i===0?cx.moveTo(sx+Math.cos(a)*r,sy+Math.sin(a)*r):cx.lineTo(sx+Math.cos(a)*r,sy+Math.sin(a)*r);}
+  cx.closePath(); cx.fill();
+  cx.fillStyle='#fff'; cx.beginPath();
+  for(let i=0;i<6;i++){const a=i/6*Math.PI*2-Math.PI/2,r=sr*.38;
+    i===0?cx.moveTo(sx+Math.cos(a)*r,sy+Math.sin(a)*r):cx.lineTo(sx+Math.cos(a)*r,sy+Math.sin(a)*r);}
+  cx.closePath(); cx.fill();
+  cx.strokeStyle='#bbb'; cx.lineWidth=1; rr(x,y,w,h,2,false);
+}
+
+// ── FLAG 228 ──────────────────────────────────────────────────
+function flag228(x,y,w,h){
+  cx.fillStyle='#fff'; rr(x,y,w,h,2);
+  cx.fillStyle='#006600'; cx.font=`bold ${h*.27}px Arial`; cx.textAlign='center'; cx.direction='rtl';
+  cx.fillText('חטיבה 228',x+w/2,y+h*.65);
+  cx.direction='ltr'; cx.textAlign='left';
+  cx.strokeStyle='#bbb'; cx.lineWidth=1; rr(x,y,w,h,2,false);
+}
+
+// ── SOLDIER (protagonist) ─────────────────────────────────────
+// ox,oy = center bottom (feet), dir=1 right
+function drawSoldier(ox,oy,s=1){
+  cx.save(); cx.translate(ox,oy); cx.scale(s,s);
+  const BC='#4d6035',DB='#3a4d28',SK='#c8906a',BT='#1a1a10';
+  // boots
+  cx.fillStyle=BT; cx.fillRect(-13,-16,12,14); cx.fillRect(2,-16,12,14);
+  // legs
+  cx.fillStyle=DB; cx.fillRect(-12,-30,11,16); cx.fillRect(2,-30,11,16);
+  // torso
+  cx.fillStyle=BC; cx.fillRect(-15,-56,30,28);
+  cx.fillStyle=DB; cx.fillRect(-2,-56,4,28); cx.fillRect(-15,-50,9,8); cx.fillRect(7,-50,9,8);
+  // left arm (normal)
+  cx.fillStyle=BC; cx.fillRect(-24,-54,10,24); cx.fillStyle=SK; cx.fillRect(-24,-32,10,12);
+  // right arm (EXTENDED - shooting pose)
+  cx.fillStyle=BC;
+  cx.save(); cx.translate(14,-48); cx.rotate(-0.4);
+  cx.fillRect(0,0,10,26); cx.fillStyle=SK; cx.fillRect(0,24,10,12); cx.restore();
+  // HEAD
+  const hR=28,hy=-62-hR;
+  // neck
+  cx.fillStyle='#c8986a'; cx.fillRect(-6,-60,12,10);
+  // full hair base
+  cx.fillStyle='#1e1208'; cx.beginPath(); cx.arc(0,hy,hR+1,0,Math.PI*2); cx.fill();
+  // skin on face
+  cx.fillStyle='#c8986a'; cx.beginPath(); cx.arc(0,hy,hR,Math.PI*.06,Math.PI*.94,false); cx.fill();
+  // side hair
+  cx.fillStyle='#1e1208';
+  cx.beginPath(); cx.ellipse(-hR*.9,hy+hR*.15,hR*.22,hR*.5,-.08,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.ellipse(hR*.9,hy+hR*.15,hR*.22,hR*.5,.08,0,Math.PI*2); cx.fill();
+  // eyes
+  cx.fillStyle='#f0ebe0';
+  cx.beginPath(); cx.ellipse(-8,hy+2,6,4,0,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.ellipse(8,hy+2,6,4,0,0,Math.PI*2); cx.fill();
+  cx.fillStyle='#2e1606';
+  cx.beginPath(); cx.arc(-8,hy+2,3.2,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.arc(8,hy+2,3.2,0,Math.PI*2); cx.fill();
+  cx.fillStyle='rgba(255,255,255,.8)';
+  cx.beginPath(); cx.arc(-6.5,hy,1.5,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.arc(9.5,hy,1.5,0,Math.PI*2); cx.fill();
+  // eyebrows
+  cx.fillStyle='#150a02';
+  cx.beginPath(); cx.ellipse(-8,hy-7,7,2.5,-.1,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.ellipse(8,hy-7,7,2.5,.1,0,Math.PI*2); cx.fill();
+  // big smile
+  cx.fillStyle='#4a1010';
+  cx.beginPath(); cx.ellipse(0,hy+14,11,6,0,0,Math.PI); cx.fill();
+  cx.fillStyle='#f4f2ea';
+  cx.beginPath(); cx.ellipse(0,hy+13,9,4.5,0,0,Math.PI); cx.fill();
+  // beard stubble
+  cx.fillStyle='rgba(22,10,3,.52)';
+  cx.beginPath(); cx.ellipse(0,hy+22,10,6,0,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.ellipse(-12,hy+15,4.5,8,.2,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.ellipse(12,hy+15,4.5,8,-.2,0,Math.PI*2); cx.fill();
+  // cap
+  cx.fillStyle='#4a6030';
+  cx.beginPath(); cx.arc(0,hy,hR*1.06,Math.PI*1.05,Math.PI*1.95,false);
+  cx.lineTo(hR*.95,hy-2); cx.arc(0,hy,hR*.72,Math.PI*1.95,Math.PI*1.05,true);
+  cx.closePath(); cx.fill();
+  cx.fillStyle='#3a4e24';
+  cx.beginPath();
+  cx.arc(0,hy,hR*1.06,Math.PI*1.78,Math.PI*1.22,true);
+  cx.arc(0,hy,hR*.88,Math.PI*1.22,Math.PI*1.78,false);
+  cx.closePath(); cx.fill();
+  // brim right
+  cx.fillStyle='#4a6030';
+  cx.beginPath(); cx.moveTo(hR*.3,hy-2);
+  cx.bezierCurveTo(hR*.5,hy-6,hR*1.5,hy-3,hR*1.6,hy+2);
+  cx.bezierCurveTo(hR*1.5,hy+6,hR*.4,hy+4,hR*.2,hy+2);
+  cx.closePath(); cx.fill();
+  // bubble being shot
+  cx.strokeStyle='#55ddff'; cx.lineWidth=3; cx.fillStyle='rgba(80,220,255,.2)';
+  cx.beginPath(); cx.arc(55,hy+5,18,0,Math.PI*2); cx.fill(); cx.stroke();
+  cx.fillStyle='rgba(255,255,255,.7)';
+  cx.beginPath(); cx.arc(48,hy-1,5,0,Math.PI*2); cx.fill();
+  cx.fillStyle='#00dd66'; cx.font='bold 7px Arial'; cx.textAlign='center'; cx.direction='rtl';
+  cx.fillText('לא',55,hy+3); cx.fillText('לזעת',55,hy+13);
+  cx.direction='ltr';
+  cx.restore();
+}
+
+// ── ANNA BOSS ─────────────────────────────────────────────────
+function drawAnna(ox,oy,s=1){
+  cx.save(); cx.translate(ox,oy); cx.scale(s,s);
+  const SK='#e8c8a8',HR='#6b3a1a',BLK='#111118';
+  // legs + shoes
+  cx.fillStyle='#1a1010'; cx.fillRect(-20,-50,16,46); cx.fillRect(6,-50,16,46);
+  cx.fillStyle='#0a0808'; cx.fillRect(-22,-16,22,16); cx.fillRect(2,-16,22,16);
+  // body
+  cx.fillStyle=BLK; cx.fillRect(-26,-100,52,54);
+  cx.fillStyle='#222230'; cx.beginPath(); cx.moveTo(-10,-100); cx.lineTo(0,-88); cx.lineTo(10,-100); cx.fill();
+  // arms - hands on hips (angry pose)
+  cx.fillStyle=BLK;
+  cx.save(); cx.translate(-32,-92); cx.rotate(.3); cx.fillRect(0,0,14,38); cx.restore();
+  cx.save(); cx.translate(20,-92); cx.rotate(-.3); cx.fillRect(0,0,14,38); cx.restore();
+  cx.fillStyle=SK;
+  cx.save(); cx.translate(-38,-62); cx.rotate(.35); cx.fillRect(0,0,14,16); cx.restore();
+  cx.save(); cx.translate(26,-62); cx.rotate(-.35); cx.fillRect(0,0,14,16); cx.restore();
+  // necklace
+  cx.strokeStyle='#d4af37'; cx.lineWidth=1.5;
+  cx.beginPath(); cx.arc(0,-90,12,.2,Math.PI-.2); cx.stroke();
+  cx.fillStyle='#d4af37'; cx.beginPath(); cx.arc(0,-78,3,0,Math.PI*2); cx.fill();
+  // HEAD (oval)
+  cx.fillStyle=SK; cx.beginPath(); cx.ellipse(0,-126,33,35,0,0,Math.PI*2); cx.fill();
+  // hair (long, flowing)
+  cx.fillStyle=HR;
+  cx.beginPath(); cx.moveTo(-30,-155); cx.bezierCurveTo(-50,-130,-54,-88,-46,-48); cx.lineTo(-34,-48); cx.bezierCurveTo(-40,-84,-36,-120,-18,-148); cx.closePath(); cx.fill();
+  cx.beginPath(); cx.moveTo(30,-155); cx.bezierCurveTo(50,-130,54,-88,46,-48); cx.lineTo(34,-48); cx.bezierCurveTo(40,-84,36,-120,18,-148); cx.closePath(); cx.fill();
+  cx.beginPath(); cx.ellipse(0,-156,30,16,0,0,Math.PI*2); cx.fill();
+  // eyes (narrowed/angry)
+  cx.fillStyle='#fff';
+  cx.beginPath(); cx.ellipse(-12,-128,5,3,0,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.ellipse(12,-128,5,3,0,0,Math.PI*2); cx.fill();
+  cx.fillStyle='#5a3010';
+  cx.beginPath(); cx.arc(-12,-128,2.5,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.arc(12,-128,2.5,0,Math.PI*2); cx.fill();
+  // angry brows
+  cx.fillStyle='#4a2808';
+  cx.save(); cx.translate(-14,-136); cx.rotate(.22); cx.beginPath(); cx.ellipse(6,0,9,2.5,0,0,Math.PI*2); cx.fill(); cx.restore();
+  cx.save(); cx.translate(14,-136); cx.rotate(-.22); cx.beginPath(); cx.ellipse(-6,0,9,2.5,0,0,Math.PI*2); cx.fill(); cx.restore();
+  // pouty lips
+  cx.fillStyle='#d07080';
+  cx.beginPath(); cx.moveTo(-12,-107); cx.bezierCurveTo(-10,-100,-4,-96,0,-95); cx.bezierCurveTo(4,-96,10,-100,12,-107); cx.bezierCurveTo(6,-106,-6,-106,-12,-107); cx.fill();
+  cx.strokeStyle='#a04858'; cx.lineWidth=1;
+  cx.beginPath(); cx.moveTo(-12,-107); cx.lineTo(12,-107); cx.stroke();
+  // earrings
+  cx.fillStyle='#d4af37';
+  cx.beginPath(); cx.arc(-33,-124,4,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.arc(33,-124,4,0,Math.PI*2); cx.fill();
+  // CROWN
+  cx.fillStyle='#d4af37';
+  cx.beginPath();
+  cx.moveTo(-22,-170); cx.lineTo(-18,-184); cx.lineTo(-8,-176);
+  cx.lineTo(0,-190); cx.lineTo(8,-176); cx.lineTo(18,-184); cx.lineTo(22,-170);
+  cx.closePath(); cx.fill();
+  cx.strokeStyle='#b8860b'; cx.lineWidth=1.5; cx.strokeRect(-22,-170,44,6);
+  cx.fillStyle='#ff4444'; cx.beginPath(); cx.arc(0,-188,4.5,0,Math.PI*2); cx.fill();
+  cx.fillStyle='#4444ff'; cx.beginPath(); cx.arc(-18,-182,3.5,0,Math.PI*2); cx.fill();
+  cx.fillStyle='#44ff44'; cx.beginPath(); cx.arc(18,-182,3.5,0,Math.PI*2); cx.fill();
+  cx.restore();
+}
+
+// ── AMIR BOSS ─────────────────────────────────────────────────
+function drawAmir(ox,oy,s=1){
+  cx.save(); cx.translate(ox,oy); cx.scale(s,s);
+  const SK='#c8906a',HR='#1a0c06';
+  // trousers + shoes
+  cx.fillStyle='#1a1a2a'; cx.fillRect(-20,-50,17,46); cx.fillRect(5,-50,17,46);
+  cx.fillStyle='#0a0a12'; cx.fillRect(-22,-16,24,16); cx.fillRect(0,-16,24,16);
+  // suit jacket
+  cx.fillStyle='#1e1e2e'; cx.fillRect(-26,-102,52,56);
+  // white shirt
+  cx.fillStyle='#f0f0f8';
+  cx.beginPath(); cx.moveTo(-8,-102); cx.lineTo(0,-88); cx.lineTo(8,-102); cx.fill();
+  cx.fillRect(-5,-88,10,32);
+  // red tie
+  cx.fillStyle='#aa1122';
+  cx.beginPath(); cx.moveTo(-4,-90); cx.lineTo(4,-90); cx.lineTo(3,-65); cx.lineTo(0,-60); cx.lineTo(-3,-65); cx.closePath(); cx.fill();
+  // lapels
+  cx.fillStyle='#2a2a3a';
+  cx.beginPath(); cx.moveTo(-8,-102); cx.lineTo(-24,-90); cx.lineTo(-14,-80); cx.lineTo(0,-88); cx.closePath(); cx.fill();
+  cx.beginPath(); cx.moveTo(8,-102); cx.lineTo(24,-90); cx.lineTo(14,-80); cx.lineTo(0,-88); cx.closePath(); cx.fill();
+  // arms (pointing/dramatic)
+  cx.fillStyle='#1e1e2e';
+  cx.save(); cx.translate(-40,-100); cx.rotate(-.25); cx.fillRect(0,0,16,46); cx.restore();
+  cx.save(); cx.translate(26,-100); cx.rotate(.35); cx.fillRect(0,0,16,46); cx.restore();
+  cx.fillStyle='#f0f0f8';
+  cx.save(); cx.translate(-40,-58); cx.rotate(-.25); cx.fillRect(0,0,16,8); cx.restore();
+  cx.save(); cx.translate(26,-58); cx.rotate(.35); cx.fillRect(0,0,16,8); cx.restore();
+  cx.fillStyle=SK;
+  cx.save(); cx.translate(-40,-52); cx.rotate(-.25); cx.fillRect(0,0,16,14); cx.restore();
+  cx.save(); cx.translate(26,-52); cx.rotate(.35); cx.fillRect(0,0,16,14); cx.restore();
+  // neck
+  cx.fillStyle=SK; cx.fillRect(-7,-108,14,10);
+  // BIG HEAD
+  const hR=36,hy=-108-hR;
+  cx.fillStyle=SK; cx.beginPath(); cx.arc(0,hy,hR,0,Math.PI*2); cx.fill();
+  cx.fillStyle=HR; cx.beginPath(); cx.arc(0,hy,hR+1,0,Math.PI*2); cx.fill();
+  cx.fillStyle=SK; cx.beginPath(); cx.arc(0,hy,hR,Math.PI*.08,Math.PI*.92,false); cx.fill();
+  // hair texture
+  cx.fillStyle='#2a1408';
+  cx.beginPath(); cx.ellipse(-hR*.2,hy-hR*.85,hR*.22,hR*.1,-.2,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.ellipse(hR*.15,hy-hR*.88,hR*.2,hR*.09,.2,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.ellipse(-hR*.55,hy-hR*.72,hR*.18,hR*.08,-.3,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.ellipse(hR*.5,hy-hR*.7,hR*.18,hR*.08,.3,0,Math.PI*2); cx.fill();
+  cx.fillStyle=HR;
+  cx.beginPath(); cx.ellipse(-hR*.9,hy+hR*.1,hR*.2,hR*.5,.05,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.ellipse(hR*.9,hy+hR*.1,hR*.2,hR*.5,-.05,0,Math.PI*2); cx.fill();
+  // eyes
+  const ex1=-hR*.3,ex2=hR*.3,ey=hy+hR*.1;
+  cx.fillStyle='#f0ebe0';
+  cx.beginPath(); cx.ellipse(ex1,ey,hR*.2,hR*.13,0,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.ellipse(ex2,ey,hR*.2,hR*.13,0,0,Math.PI*2); cx.fill();
+  cx.fillStyle='#2e1206';
+  cx.beginPath(); cx.arc(ex1,ey,hR*.12,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.arc(ex2,ey,hR*.12,0,Math.PI*2); cx.fill();
+  cx.fillStyle='rgba(255,255,255,.85)';
+  cx.beginPath(); cx.arc(ex1+hR*.05,ey-hR*.04,hR*.04,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.arc(ex2+hR*.05,ey-hR*.04,hR*.04,0,Math.PI*2); cx.fill();
+  // eyebrows
+  cx.fillStyle='#120806';
+  cx.beginPath(); cx.ellipse(ex1,ey-hR*.23,hR*.22,hR*.09,-.1,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.ellipse(ex2,ey-hR*.23,hR*.22,hR*.09,.1,0,Math.PI*2); cx.fill();
+  // big smile
+  const my=hy+hR*.54;
+  cx.fillStyle='#3a0808'; cx.beginPath(); cx.ellipse(0,my,hR*.38,hR*.2,0,0,Math.PI); cx.fill();
+  cx.fillStyle='#f2f0e8'; cx.beginPath(); cx.ellipse(0,my-hR*.02,hR*.33,hR*.13,0,0,Math.PI); cx.fill();
+  // FULL BEARD
+  cx.fillStyle='rgba(18,8,2,.78)';
+  cx.beginPath(); cx.ellipse(0,hy+hR*.62,hR*.72,hR*.42,0,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.ellipse(0,hy+hR*.82,hR*.35,hR*.25,0,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.ellipse(-hR*.45,hy+hR*.42,hR*.22,hR*.35,.2,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.ellipse(hR*.45,hy+hR*.42,hR*.22,hR*.35,-.2,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.ellipse(0,my-hR*.18,hR*.28,hR*.1,0,0,Math.PI*2); cx.fill();
+  // teeth re-show
+  cx.fillStyle='rgba(250,240,220,.85)'; cx.beginPath(); cx.ellipse(0,my-hR*.04,hR*.3,hR*.12,0,0,Math.PI); cx.fill();
+  // coupons around Amir
+  [[-55,-140,.4],[-70,-100,-.3],[60,-130,.5],[72,-90,-.4]].forEach(([dx,dy,rot])=>{
+    cx.save(); cx.translate(dx,dy); cx.rotate(rot);
+    cx.fillStyle='#22aa44'; cx.strokeStyle='#116622'; cx.lineWidth=1.5;
+    cx.beginPath(); cx.roundRect?cx.roundRect(-13,-8,26,16,3):cx.rect(-13,-8,26,16); cx.fill(); cx.stroke();
+    cx.fillStyle='#fff'; cx.font='bold 8px Arial'; cx.textAlign='center';
+    cx.fillText('50%',0,4);
+    cx.fillStyle='#ffee00'; cx.font='bold 6px Arial'; cx.fillText('₪ קופון',0,-2);
+    cx.restore();
+  });
+  cx.restore();
+}
+
+// ── ENEMY SOLDIER (small) ─────────────────────────────────────
+function drawEnemy(ox,oy,s=1){
+  cx.save(); cx.translate(ox,oy); cx.scale(s,s);
+  const BC='#354025',DB='#28341a',SK='#b07248',HC='#1a2810',BT='#1a1a10';
+  cx.fillStyle=BT; cx.fillRect(-10,-16,11,13); cx.fillRect(1,-16,11,13);
+  cx.fillStyle=DB; cx.fillRect(-9,-28,9,14); cx.fillRect(2,-28,9,14);
+  cx.fillStyle=BC; cx.fillRect(-13,-50,26,25);
+  cx.fillStyle=DB; cx.fillRect(-13,-44,7,7); cx.fillRect(7,-44,7,7);
+  cx.fillStyle=BC; cx.fillRect(-21,-48,9,20); cx.fillRect(13,-48,9,20);
+  cx.fillStyle=SK; cx.fillRect(-21,-30,9,9); cx.fillRect(13,-30,9,9);
+  cx.fillStyle=SK; cx.beginPath(); cx.arc(0,-38,14,0,Math.PI*2); cx.fill();
+  cx.fillStyle='#cc2200';
+  cx.beginPath(); cx.arc(-5,-38,2.5,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.arc(5,-38,2.5,0,Math.PI*2); cx.fill();
+  cx.strokeStyle='#661100'; cx.lineWidth=2;
+  cx.beginPath(); cx.arc(0,-31,5,Math.PI+.3,Math.PI*2-.3); cx.stroke();
+  cx.fillStyle='#160c00';
+  cx.save(); cx.translate(-7,-46); cx.rotate(.35); cx.fillRect(0,0,14,2.5); cx.restore();
+  cx.save(); cx.translate(7,-46); cx.rotate(-.35); cx.fillRect(-12,0,14,2.5); cx.restore();
+  cx.fillStyle=HC;
+  cx.beginPath(); cx.arc(0,-38,17,Math.PI,Math.PI*2); cx.fill();
+  cx.fillRect(-18,-38,36,8);
+  cx.restore();
+}
+
+// ── SPEECH BUBBLE ─────────────────────────────────────────────
+function speechBbl(bx,by,text,maxW=180){
+  const pad=9,lH=16,fs=12;
+  cx.font=`bold ${fs}px Arial`;
+  const words=text.split(' '),lines=[];let cur='';
+  for(const w of words){const t=cur?cur+' '+w:w;cx.measureText(t).width>maxW-pad*2?(lines.push(cur),cur=w):cur=t;}
+  if(cur) lines.push(cur);
+  const bw=Math.min(maxW,Math.max(...lines.map(l=>cx.measureText(l).width))+pad*2+6);
+  const bh=lines.length*lH+pad*2;
+  let sx=bx-bw/2,sy=by-bh-20;
+  sx=Math.max(24,Math.min(W-bw-24,sx)); sy=Math.max(24,sy);
+  cx.fillStyle='rgba(0,0,0,.2)'; cx.beginPath(); if(cx.roundRect)cx.roundRect(sx+3,sy+3,bw,bh,7); else cx.rect(sx+3,sy+3,bw,bh); cx.fill();
+  cx.fillStyle='rgba(255,255,242,.97)'; cx.strokeStyle='#2244aa'; cx.lineWidth=2;
+  cx.beginPath(); if(cx.roundRect)cx.roundRect(sx,sy,bw,bh,7); else cx.rect(sx,sy,bw,bh); cx.fill(); cx.stroke();
+  cx.fillStyle='rgba(255,255,242,.97)';
+  cx.beginPath(); cx.moveTo(bx-7,sy+bh); cx.lineTo(bx+7,sy+bh); cx.lineTo(bx,sy+bh+16); cx.closePath(); cx.fill();
+  cx.strokeStyle='#2244aa'; cx.lineWidth=2;
+  cx.beginPath(); cx.moveTo(bx-7,sy+bh); cx.lineTo(bx,sy+bh+16); cx.lineTo(bx+7,sy+bh); cx.stroke();
+  cx.fillStyle='#111133'; cx.font=`bold ${fs}px Arial`; cx.textAlign='center'; cx.direction='rtl';
+  lines.forEach((l,i)=>cx.fillText(l,sx+bw/2,sy+pad+fs+i*lH));
+  cx.direction='ltr'; cx.textAlign='left';
+}
+
+// ── FLOATING BUBBLE ────────────────────────────────────────────
+function floatBubble(x,y,r){
+  cx.save();
+  cx.strokeStyle='#00ff88'; cx.lineWidth=2.5; cx.fillStyle='rgba(0,255,136,.12)';
+  cx.beginPath(); cx.arc(x,y,r,0,Math.PI*2); cx.fill(); cx.stroke();
+  cx.strokeStyle='rgba(150,255,200,.4)'; cx.lineWidth=1;
+  cx.beginPath(); cx.arc(x-r*.28,y-r*.28,r*.44,0,Math.PI*2); cx.stroke();
+  cx.fillStyle='rgba(255,255,255,.55)';
+  cx.beginPath(); cx.ellipse(x-r*.25,y-r*.3,r*.15,r*.09,-.5,0,Math.PI*2); cx.fill();
+  cx.fillStyle='#00dd66'; cx.font=`bold ${Math.max(9,r*.45)}px Arial`; cx.textAlign='center'; cx.direction='rtl';
+  cx.fillText('לא',x,y-r*.1); cx.fillText('לזעת!',x,y+r*.38);
+  cx.direction='ltr'; cx.restore();
+}
+
+// ═════════════════════════════════════════════════════════════
+// BEGIN DRAWING
+// ═════════════════════════════════════════════════════════════
+
+// ── OUTER BACKGROUND ──────────────────────────────────────────
+const outerG=cx.createLinearGradient(0,0,W,H);
+outerG.addColorStop(0,'#0a1a0a'); outerG.addColorStop(.5,'#0d2010'); outerG.addColorStop(1,'#06120a');
+cx.fillStyle=outerG; cx.fillRect(0,0,W,H);
+
+// Subtle grid texture
+cx.save(); cx.globalAlpha=.04; cx.strokeStyle='#00ff55'; cx.lineWidth=1;
+for(let x=0;x<W;x+=40){cx.beginPath();cx.moveTo(x,0);cx.lineTo(x,H);cx.stroke();}
+for(let y=0;y<H;y+=40){cx.beginPath();cx.moveTo(0,y);cx.lineTo(W,y);cx.stroke();}
+cx.restore();
+
+// ── GOLD OUTER BORDER ─────────────────────────────────────────
+cx.strokeStyle='#d4af37'; cx.lineWidth=14; cx.strokeRect(7,7,W-14,H-14);
+cx.strokeStyle='#f0d060'; cx.lineWidth=3; cx.strokeRect(19,19,W-38,H-38);
+cx.strokeStyle='rgba(255,215,0,.25)'; cx.lineWidth=1; cx.strokeRect(23,23,W-46,H-46);
+
+// ── TOP PUBLISHER BAR ─────────────────────────────────────────
+cx.fillStyle='rgba(0,0,0,.85)'; cx.fillRect(14,14,W-28,48);
+cx.strokeStyle='#d4af37'; cx.lineWidth=1; cx.strokeRect(14,62,W-28,1);
+cx.fillStyle='#d4af37'; cx.font='bold 14px Arial'; cx.textAlign='left';
+cx.fillText('✦  חטיבה 228 GAMES', 30, 44);
+cx.fillStyle='#aaffaa'; cx.font='bold 12px monospace'; cx.textAlign='right';
+cx.fillText('WEB BROWSER EDITION  ✦', W-30, 44);
+cx.textAlign='left';
+
+// ── TITLE ZONE (y=63 to y=215) ────────────────────────────────
+// Background
+const titleBg=cx.createLinearGradient(0,63,0,215);
+titleBg.addColorStop(0,'#061206'); titleBg.addColorStop(1,'#0d2010');
+cx.fillStyle=titleBg; cx.fillRect(14,63,W-28,152);
+
+// Radial burst lines
+cx.save();
+const bcx=W/2,bcy=140;
+for(let i=0;i<28;i++){
+  const a=i*Math.PI/14;
+  const g=cx.createLinearGradient(bcx,bcy,bcx+Math.cos(a)*380,bcy+Math.sin(a)*380);
+  g.addColorStop(0,'rgba(0,255,70,.2)'); g.addColorStop(1,'rgba(0,255,70,0)');
+  cx.fillStyle=g; cx.beginPath(); cx.moveTo(bcx,bcy);
+  cx.arc(bcx,bcy,380,a-.11,a+.11); cx.closePath(); cx.fill();
+}
+cx.restore();
+
+// Title GLOW
+cx.save();
+cx.shadowColor='#00ff55'; cx.shadowBlur=45;
+cx.fillStyle='#00ff55'; cx.font='bold 92px "Arial Black",Arial'; cx.textAlign='center'; cx.direction='rtl';
+cx.fillText('!לא לזעת',W/2,155);
+cx.restore();
+// Title outline
+cx.strokeStyle='#003a00'; cx.lineWidth=7;
+cx.font='bold 92px "Arial Black",Arial'; cx.textAlign='center'; cx.direction='rtl';
+cx.strokeText('!לא לזעת',W/2,155);
+// Title fill - gradient
+const titleFill=cx.createLinearGradient(0,75,0,165);
+titleFill.addColorStop(0,'#88ffaa'); titleFill.addColorStop(.4,'#00ff55'); titleFill.addColorStop(1,'#00cc33');
+cx.fillStyle=titleFill; cx.fillText('!לא לזעת',W/2,155);
+cx.direction='ltr';
+
+// Subtitle
+cx.save(); cx.shadowColor='#00ccff'; cx.shadowBlur=18;
+cx.fillStyle='#00ccff'; cx.font='bold 22px Arial'; cx.textAlign='center';
+cx.fillText('🫧  B U B B L E   W A R R I O R  🫧',W/2,196);
+cx.restore();
+
+// Stars on subtitle line
+[[120,185],[W-120,185]].forEach(([x,y])=>{
+  star(x,y,10,5,5,'#ffee00');
+});
+
+// ── SCENE (y=215 to y=700) ────────────────────────────────────
+const sceneT=215,sceneB=700;
+
+// Night sky LEFT half
+const nG=cx.createLinearGradient(0,sceneT,0,sceneB);
+nG.addColorStop(0,'#0e1a0e'); nG.addColorStop(1,'#1e301e');
+cx.fillStyle=nG; cx.fillRect(14,sceneT,W/2,sceneB-sceneT);
+
+// Stars
+cx.fillStyle='rgba(220,220,200,.9)';
+for(let i=0;i<60;i++){const sx2=(i*137.5)%((W/2)-40)+24,sy2=(i*61.3)%160+sceneT+10;cx.fillRect(sx2,sy2,i%4===0?2:1,i%4===0?2:1);}
+// Moon
+cx.fillStyle='#e8e8c8'; cx.beginPath(); cx.arc(100,260,24,0,Math.PI*2); cx.fill();
+cx.fillStyle='#0e1a0e'; cx.beginPath(); cx.arc(112,253,22,0,Math.PI*2); cx.fill();
+
+// Day sky RIGHT half
+const dG=cx.createLinearGradient(W/2,sceneT,W/2,sceneB);
+dG.addColorStop(0,'#5ab4e8'); dG.addColorStop(.5,'#8ed4f5'); dG.addColorStop(1,'#c8eeff');
+cx.fillStyle=dG; cx.fillRect(W/2,sceneT,W/2,sceneB-sceneT);
+
+// Sun
+cx.save(); cx.shadowColor='#ffee44'; cx.shadowBlur=35;
+cx.fillStyle='#ffe030'; cx.beginPath(); cx.arc(W-105,262,30,0,Math.PI*2); cx.fill(); cx.restore();
+cx.fillStyle='rgba(255,230,80,.18)'; cx.beginPath(); cx.arc(W-105,262,50,0,Math.PI*2); cx.fill();
+// Clouds
+[[520,260,1],[645,248,.85],[730,275,.72]].forEach(([x2,y2,s])=>{
+  cx.fillStyle='rgba(255,255,255,.9)';
+  cx.beginPath(); cx.arc(x2,y2,24*s,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.arc(x2+26*s,y2+5*s,18*s,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.arc(x2-18*s,y2+7*s,16*s,0,Math.PI*2); cx.fill();
+});
+
+// Dividing line (dramatic)
+const divG=cx.createLinearGradient(W/2,sceneT,W/2,sceneB);
+divG.addColorStop(0,'rgba(255,255,100,.6)'); divG.addColorStop(1,'rgba(255,255,100,.2)');
+cx.strokeStyle=divG; cx.lineWidth=3; cx.setLineDash([14,8]);
+cx.beginPath(); cx.moveTo(W/2,sceneT); cx.lineTo(W/2,sceneB); cx.stroke();
+cx.setLineDash([]);
+
+// Zone labels
+cx.save(); cx.globalAlpha=.55; cx.direction='rtl'; cx.textAlign='center';
+cx.fillStyle='rgba(200,255,200,.8)'; cx.font='bold 11px monospace';
+cx.fillText('לילה — בסיס צבאי',W/4+7,sceneT+22);
+cx.fillStyle='rgba(0,80,160,.8)'; cx.fillText('בוקר — קרב סופי',W*3/4,sceneT+22);
+cx.direction='ltr'; cx.restore();
+
+// Ground - night side
+const gnG=cx.createLinearGradient(0,650,0,700);
+gnG.addColorStop(0,'#4a3c20'); gnG.addColorStop(1,'#2a1c08');
+cx.fillStyle=gnG; cx.fillRect(14,650,W/2,50);
+// Night hills
+cx.fillStyle='#142014';
+cx.beginPath(); cx.moveTo(14,670); cx.bezierCurveTo(80,615,160,640,240,622);
+cx.bezierCurveTo(290,610,355,642,397,652); cx.lineTo(397,700); cx.lineTo(14,700); cx.fill();
+
+// Ground - day side
+const gdG=cx.createLinearGradient(0,650,0,700);
+gdG.addColorStop(0,'#4a8e2a'); gdG.addColorStop(1,'#2a5a10');
+cx.fillStyle=gdG; cx.fillRect(W/2,650,W/2,50);
+// Day hills
+cx.fillStyle='#5a9e3a';
+cx.beginPath(); cx.moveTo(397,668); cx.bezierCurveTo(450,625,525,644,588,628);
+cx.bezierCurveTo(645,614,705,642,W-14,656); cx.lineTo(W-14,700); cx.lineTo(397,700); cx.fill();
+
+// ── FLAGS ──────────────────────────────────────────────────────
+// Pole + flag (Israel, left)
+cx.fillStyle='#888'; cx.fillRect(30,sceneT+8,3,72);
+flagIsrael(33,sceneT+10,78,54);
+// Pole + flag (228, right)
+cx.fillStyle='#888'; cx.fillRect(W-33,sceneT+8,3,72);
+flag228(W-111,sceneT+10,78,54);
+
+// ── CHARACTERS ────────────────────────────────────────────────
+// Background enemy soldiers
+drawEnemy(100,695,.75);
+drawEnemy(152,695,.68);
+drawEnemy(W-108,695,.72);
+drawEnemy(W-158,695,.65);
+
+// ANNA (left, large, glowing)
+cx.save(); cx.shadowColor='#ff2200'; cx.shadowBlur=22;
+drawAnna(165,698,1.22);
+cx.restore();
+
+// AMIR (right, large, glowing)
+cx.save(); cx.shadowColor='#2255ff'; cx.shadowBlur=22;
+drawAmir(W-162,696,1.18);
+cx.restore();
+
+// PROTAGONIST (center, biggest, glowing green)
+cx.save(); cx.shadowColor='#00ff55'; cx.shadowBlur=32;
+drawSoldier(W/2,698,1.9);
+cx.restore();
+
+// ── FLOATING BUBBLES ──────────────────────────────────────────
+floatBubble(68,445,26);
+floatBubble(195,365,21);
+floatBubble(W-70,468,25);
+floatBubble(W-45,370,19);
+floatBubble(560,340,23);
+
+// ── SPEECH BUBBLES ────────────────────────────────────────────
+speechBbl(175,430,'אמיררר איפה אתההה??',160);
+speechBbl(W-155,435,'אורר תוריד קופון!',155);
+speechBbl(W/2-10,345,'לא לזעתתתת!!',145);
+
+// ── COUPON FLYING (mid air) ───────────────────────────────────
+[[320,290,.3],[340,320,-.2],[265,310,.5]].forEach(([x,y,r])=>{
+  cx.save(); cx.translate(x,y); cx.rotate(r);
+  cx.fillStyle='#22aa44'; cx.strokeStyle='#116622'; cx.lineWidth=1.5;
+  cx.beginPath(); cx.roundRect?cx.roundRect(-13,-8,26,16,3):cx.rect(-13,-8,26,16); cx.fill(); cx.stroke();
+  cx.fillStyle='#fff'; cx.font='bold 7px Arial'; cx.textAlign='center'; cx.fillText('50%',0,3);
+  cx.fillStyle='#ffee00'; cx.font='bold 5px Arial'; cx.fillText('₪ קופון',0,-2);
+  cx.restore();
+});
+
+// ── FEATURE BADGES STRIP (y=700 to y=782) ─────────────────────
+cx.fillStyle='rgba(0,0,0,.82)'; cx.fillRect(14,700,W-28,82);
+cx.strokeStyle='#d4af37'; cx.lineWidth=2; cx.strokeRect(14,700,W-28,82);
+cx.strokeStyle='rgba(255,215,0,.4)'; cx.lineWidth=1; cx.strokeRect(18,704,W-36,74);
+
+const badges=[
+  {x:88,  y:741, text:'2\nBOSSES!', col:'#ff4422'},
+  {x:215, y:741, text:'MOBILE!\nמובייל', col:'#00ccff'},
+  {x:345, y:741, text:'בחינם!\nFREE',   col:'#ffee00'},
+  {x:475, y:741, text:'בעברית!\nHEBREW',col:'#ff44ff'},
+  {x:605, y:741, text:'10\nBUBBLES',    col:'#00ff88'},
+  {x:715, y:741, text:'אינסופי\nFUN!',  col:'#ff9922'},
+];
+badges.forEach(b=>{
+  star(b.x,b.y,40,28,8,b.col+'33');
+  cx.save(); cx.strokeStyle=b.col; cx.lineWidth=2;
+  cx.beginPath();
+  for(let i=0;i<16;i++){const a=i*Math.PI/8-Math.PI/2,r=i%2===0?38:26;
+    i===0?cx.moveTo(b.x+Math.cos(a)*r,b.y+Math.sin(a)*r):cx.lineTo(b.x+Math.cos(a)*r,b.y+Math.sin(a)*r);}
+  cx.closePath(); cx.stroke(); cx.restore();
+  const lines=b.text.split('\n');
+  cx.fillStyle=b.col; cx.font=`bold ${lines.length>1?10:12}px Arial`; cx.textAlign='center'; cx.direction='rtl';
+  lines.forEach((l,i)=>cx.fillText(l,b.x,b.y+(i-(lines.length-1)/2)*13+4));
+  cx.direction='ltr';
+});
+
+// ── DESCRIPTION (y=782 to y=890) ──────────────────────────────
+cx.fillStyle='rgba(0,10,0,.88)'; cx.fillRect(14,782,W-28,108);
+cx.strokeStyle='rgba(0,180,80,.3)'; cx.lineWidth=1; cx.strokeRect(14,782,W-28,108);
+
+cx.save(); cx.direction='rtl'; cx.textAlign='right';
+cx.fillStyle='#00ff88'; cx.font='bold 15px Arial';
+cx.fillText('הצטרף לחייל האגדי במשחק פעולה מטורף בעברית!',W-28,806);
+cx.fillStyle='#aaffaa'; cx.font='13px Arial'; cx.lineHeight=1.6;
+cx.fillText('• אסוף 10 בועות לא-לזעת כדי להתקדם לקרב הבוס',W-28,827);
+cx.fillText('• הכה את אנה (BOSS 1) בקרב לילי בבסיס צבאי',W-28,847);
+cx.fillText('• המשך לאמיר נאמן (BOSS 2) — בוס הקופונים הגדול!',W-28,867);
+cx.fillStyle='#55ff88'; cx.font='12px Arial';
+cx.fillText('✓ תמיכה מלאה במובייל  ✓ מקלדת וכפתורי מגע  ✓ חינם לחלוטין',W-28,886);
+cx.direction='ltr'; cx.restore();
+
+// ── "ACTUAL GAMEPLAY" SCREENSHOTS ROW (y=890 to y=988) ────────
+cx.fillStyle='rgba(0,5,0,.9)'; cx.fillRect(14,890,W-28,98);
+cx.strokeStyle='rgba(0,100,50,.4)'; cx.lineWidth=1; cx.strokeRect(14,890,W-28,98);
+
+cx.fillStyle='#556655'; cx.font='bold 9px monospace'; cx.textAlign='center';
+cx.fillText('— ACTUAL GAMEPLAY SCREENSHOTS —', W/2, 904);
+
+// Mini screenshot boxes
+const shots=[
+  {x:30, label:'שלב ראשון', col:'#1e301e'},
+  {x:220, label:'קרב BOSS אנה', col:'#2a0a00'},
+  {x:410, label:'בוקר — אמיר', col:'#1a3a5a'},
+  {x:600, label:'ניצחון!', col:'#1a2a0a'},
+];
+shots.forEach(({x,label,col})=>{
+  // mini screen
+  cx.fillStyle=col; rr(x,910,170,68,4);
+  cx.strokeStyle='#556633'; cx.lineWidth=2; rr(x,910,170,68,4,false);
+  // mini character silhouettes
+  cx.save(); cx.translate(x+85,968);
+  cx.fillStyle='rgba(0,255,80,.3)'; cx.beginPath(); cx.arc(0,-45,18,0,Math.PI*2); cx.fill();
+  cx.fillStyle='rgba(0,200,60,.5)'; cx.fillRect(-8,-30,16,30);
+  cx.restore();
+  cx.fillStyle='rgba(0,255,80,.6)'; cx.font='bold 9px monospace'; cx.textAlign='center';
+  cx.fillText(label,x+85,984);
+});
+
+// ── BOTTOM BAR (y=988 to y=1109) ──────────────────────────────
+cx.fillStyle='rgba(0,0,0,.92)'; cx.fillRect(14,988,W-28,121);
+cx.strokeStyle='#d4af37'; cx.lineWidth=1; cx.strokeRect(14,988,W-28,121);
+
+// Rating badge
+cx.fillStyle='#fff'; rr(30,1002,70,82,6);
+cx.strokeStyle='#888'; cx.lineWidth=1; rr(30,1002,70,82,6,false);
+cx.fillStyle='#222'; cx.font='bold 40px "Arial Black",Arial'; cx.textAlign='center';
+cx.fillText('E',65,1058);
+cx.fillStyle='#444'; cx.font='bold 8px Arial'; cx.fillText('EVERYONE',65,1072);
+cx.fillStyle='#666'; cx.font='7px Arial'; cx.fillText('Comic Mischief',65,1082);
+
+// Publisher info
+cx.textAlign='left';
+cx.fillStyle='#d4af37'; cx.font='bold 13px Arial';
+cx.fillText('חטיבה 228 GAMES  ©  2024', 114,1018);
+cx.fillStyle='#888'; cx.font='10px Arial';
+cx.fillText('All characters and events depicted are fictional.', 114, 1034);
+cx.fillText('Any resemblance to real persons is purely coincidental.', 114, 1048);
+cx.fillStyle='#aaffaa'; cx.font='bold 11px monospace';
+cx.fillText('levisagi.github.io/Nolazat', 114, 1066);
+cx.fillStyle='#556655'; cx.font='10px Arial';
+cx.fillText('Compatible with Chrome · Firefox · Safari · Mobile  •  No download required', 114, 1082);
+cx.fillStyle='#444'; cx.font='9px Arial';
+cx.fillText('Keyboard: ←→ move  |  ↑/SPACE jump  |  Z shoot bubble       Touch: on-screen buttons', 114, 1097);
+
+// Israeli flag small (bottom right corner)
+flagIsrael(W-104,1002,80,52);
+cx.fillStyle='#777'; cx.fillRect(W-106,988,3,66);
+
+// Barcode
+cx.fillStyle='#fff'; rr(W-202,1002,90,82,2);
+const bars=[3,1,2,1,3,2,1,3,1,2,1,3,2,1,2,3,1,2,3,1,2,1,3];
+let bxp=W-198;
+bars.forEach((bw,i)=>{cx.fillStyle=i%2===0?'#000':'#fff'; cx.fillRect(bxp,1008,bw*2,64); bxp+=bw*2;});
+cx.fillStyle='#000'; cx.font='8px monospace'; cx.textAlign='center';
+cx.fillText('0 22800 00001 8',W-157,1087);
+
+// Bottom copyright line
+cx.fillStyle='rgba(0,255,80,.4)'; cx.font='bold 10px "Courier New"'; cx.textAlign='center';
+cx.fillText('לא לזעת! • BUBBLE WARRIOR • v1.0 • Made with ♥ in Israel  🇮🇱',W/2,1105);
+cx.textAlign='left';
+
+// ── SCANLINES ─────────────────────────────────────────────────
+cx.save(); cx.globalAlpha=.055;
+for(let y=14;y<H-14;y+=3){cx.fillStyle='#000'; cx.fillRect(14,y,W-28,1);}
+cx.restore();
+
+// ── FINAL BORDER GLOW ─────────────────────────────────────────
+cx.save(); cx.globalAlpha=.5; cx.shadowColor='#00ff55'; cx.shadowBlur=16;
+cx.strokeStyle='#00ff55'; cx.lineWidth=2; cx.strokeRect(19,19,W-38,H-38);
+cx.restore();
+</script>
+</body>
+</html>
