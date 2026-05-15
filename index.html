@@ -1380,7 +1380,6 @@ function loop(){
       if(boss2IntroT<=0){GS='boss2';initBoss2();enemies=[];bullets=[];cols=[];startBG();}
     } else if(GS==='boss2'){
       drawDayBG(); updPlayer(); updBoss2(); updBullets(); updParts();
-      drawHelicopter(BOSS2.x+BOSS2.w/2,BOSS2.y-70,BOSS2.face);
       BOSS2.bullets.forEach(drawCoupon); bullets.forEach(drawBullet);
       drawBoss2Sprite(BOSS2.x+BOSS2.w/2,BOSS2.y+BOSS2.h,BOSS2.face);
       if(BOSS2.spT>0) speech(BOSS2.x+BOSS2.w/2,BOSS2.y,BOSS2.spTx);
