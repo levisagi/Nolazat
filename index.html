@@ -293,56 +293,153 @@ function drawSoldier(ox,fy,dir,state,fr,isEnemy=false){
 }
 
 // ═══════════════════════════════════════════════════════════════
-// SPRITE: BOSS - "אנה"
+// SPRITE: BOSS - "אנה" (brown hair, light skin, pouty face, necklace)
 // ═══════════════════════════════════════════════════════════════
 function drawBossSprite(ox,fy,dir){
-  const BC='#1a1a7a', DB='#0d0d55', SK='#d4a878', HR='#1a0808';
-  // Legs
-  cx.fillStyle=DB;
-  cx.fillRect(ox-20,fy-48,16,44); cx.fillRect(ox+6,fy-48,16,44);
-  cx.fillStyle='#0a0a0a';
-  cx.fillRect(ox-22,fy-20,20,20); cx.fillRect(ox+4,fy-20,20,20);
-  // Body
-  cx.fillStyle=BC; cx.fillRect(ox-24,fy-96,48,52);
-  // Epaulettes
-  cx.fillStyle='#d4af37'; cx.fillRect(ox-24,fy-96,15,8); cx.fillRect(ox+10,fy-96,15,8);
-  // Arms
-  cx.fillStyle=BC;
-  cx.fillRect(ox-38,fy-94,16,38); cx.fillRect(ox+24,fy-94,16,38);
-  cx.fillStyle=SK; cx.fillRect(ox-38,fy-60,16,12); cx.fillRect(ox+24,fy-60,16,12);
-  // Medals
-  ['#d4af37','#c0c0c0','#cd7f32'].forEach((c,i)=>{cx.fillStyle=c;cx.fillRect(ox-20+i*13,fy-80,11,11);});
-  // BIG head
-  cx.fillStyle=SK; cx.beginPath(); cx.arc(ox,fy-120,32,0,Math.PI*2); cx.fill();
-  // Hair
+  const BLK='#111118', DBLK='#0a0a10';
+  const SK='#e8c8a8';   // light skin
+  const HR='#6b3a1a';   // warm brown hair
+  const HR2='#8b4e22';  // lighter brown highlight
+
+  // --- Legs (black jeans) ---
+  cx.fillStyle=DBLK;
+  cx.fillRect(ox-20,fy-50,16,46); cx.fillRect(ox+6,fy-50,16,46);
+  // Shoes
+  cx.fillStyle='#1a1010';
+  cx.fillRect(ox-22,fy-16,22,16); cx.fillRect(ox+2,fy-16,22,16);
+
+  // --- Body (black top) ---
+  cx.fillStyle=BLK; cx.fillRect(ox-26,fy-100,52,54);
+  // Collar detail
+  cx.fillStyle='#222230';
+  cx.beginPath(); cx.moveTo(ox-10,fy-100); cx.lineTo(ox,fy-88); cx.lineTo(ox+10,fy-100); cx.fill();
+
+  // --- Arms ---
+  cx.fillStyle=BLK;
+  cx.fillRect(ox-40,fy-98,16,42); cx.fillRect(ox+26,fy-98,16,42);
+  // Hands
+  cx.fillStyle=SK; cx.fillRect(ox-40,fy-60,16,14); cx.fillRect(ox+26,fy-60,16,14);
+
+  // --- Necklace ---
+  cx.strokeStyle='#d4af37'; cx.lineWidth=1.5;
+  cx.beginPath(); cx.arc(ox,fy-90,12,0.2,Math.PI-0.2); cx.stroke();
+  cx.fillStyle='#d4af37'; cx.beginPath(); cx.arc(ox,fy-78,3,0,Math.PI*2); cx.fill();
+
+  // --- BIG HEAD ---
+  // Head shape (slightly oval)
+  cx.fillStyle=SK;
+  cx.beginPath(); cx.ellipse(ox,fy-126,33,35,0,0,Math.PI*2); cx.fill();
+
+  // --- Long brown hair (behind head first) ---
+  // Left side flowing hair
   cx.fillStyle=HR;
-  cx.beginPath(); cx.arc(ox,fy-131,26,Math.PI,Math.PI*2); cx.fill();
-  cx.fillRect(ox-28,fy-131,56,16);
-  cx.fillRect(ox-32,fy-124,8,28); cx.fillRect(ox+24,fy-124,8,28);
-  // Angry eyes
-  cx.fillStyle='#1a1a1a';
-  cx.beginPath(); cx.arc(ox-11,fy-122,4.5,0,Math.PI*2); cx.fill();
-  cx.beginPath(); cx.arc(ox+11,fy-122,4.5,0,Math.PI*2); cx.fill();
-  cx.fillStyle='#ff2200';
-  cx.beginPath(); cx.arc(ox-11,fy-122,2,0,Math.PI*2); cx.fill();
-  cx.beginPath(); cx.arc(ox+11,fy-122,2,0,Math.PI*2); cx.fill();
-  // Furious brows
+  cx.beginPath();
+  cx.moveTo(ox-30,fy-155);
+  cx.bezierCurveTo(ox-48,fy-130, ox-52,fy-90, ox-46,fy-48);
+  cx.lineTo(ox-34,fy-48);
+  cx.bezierCurveTo(ox-40,fy-85, ox-36,fy-120, ox-20,fy-148);
+  cx.closePath(); cx.fill();
+  // Right side flowing hair
   cx.fillStyle=HR;
-  cx.save(); cx.translate(ox-13,fy-130); cx.rotate(0.4); cx.fillRect(0,0,18,3.5); cx.restore();
-  cx.save(); cx.translate(ox+13,fy-130); cx.rotate(-0.4); cx.fillRect(-16,0,18,3.5); cx.restore();
-  // Angry mouth
-  cx.strokeStyle='#661a1a'; cx.lineWidth=3;
-  cx.beginPath(); cx.moveTo(ox-10,fy-107); cx.lineTo(ox+10,fy-107); cx.stroke();
-  // Military cap
-  cx.fillStyle='#0d0d44';
-  cx.beginPath(); cx.arc(ox,fy-136,30,Math.PI,Math.PI*2); cx.fill();
-  cx.fillRect(ox-34,fy-136,68,12);
-  cx.fillStyle='#1a1a88'; cx.fillRect(ox-30,fy-136,60,6);
-  // Badge
+  cx.beginPath();
+  cx.moveTo(ox+30,fy-155);
+  cx.bezierCurveTo(ox+48,fy-130, ox+52,fy-90, ox+46,fy-48);
+  cx.lineTo(ox+34,fy-48);
+  cx.bezierCurveTo(ox+40,fy-85, ox+36,fy-120, ox+20,fy-148);
+  cx.closePath(); cx.fill();
+  // Hair highlights
+  cx.fillStyle=HR2;
+  cx.beginPath();
+  cx.moveTo(ox-22,fy-155); cx.bezierCurveTo(ox-35,fy-130,ox-38,fy-100,ox-34,fy-70);
+  cx.lineTo(ox-28,fy-70); cx.bezierCurveTo(ox-30,fy-100,ox-28,fy-130,ox-14,fy-155);
+  cx.closePath(); cx.fill();
+  cx.beginPath();
+  cx.moveTo(ox+14,fy-155); cx.bezierCurveTo(ox+28,fy-130,ox+30,fy-100,ox+28,fy-70);
+  cx.lineTo(ox+34,fy-70); cx.bezierCurveTo(ox+38,fy-100,ox+35,fy-130,ox+22,fy-155);
+  cx.closePath(); cx.fill();
+
+  // --- Top of hair ---
+  cx.fillStyle=HR;
+  cx.beginPath(); cx.ellipse(ox,fy-156,30,16,0,0,Math.PI*2); cx.fill();
+  // Center parting highlight
+  cx.fillStyle=HR2;
+  cx.fillRect(ox-3,fy-168,6,16);
+
+  // --- Face features ---
+  // Eyes (dark, slightly narrowed - suspicious/angry)
+  cx.fillStyle='#1a1010';
+  cx.beginPath(); cx.ellipse(ox-12,fy-128,5,3.8,0,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.ellipse(ox+12,fy-128,5,3.8,0,0,Math.PI*2); cx.fill();
+  // Eye whites
+  cx.fillStyle='#fff';
+  cx.beginPath(); cx.ellipse(ox-12,fy-128,4,2.8,0,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.ellipse(ox+12,fy-128,4,2.8,0,0,Math.PI*2); cx.fill();
+  // Iris (brown)
+  cx.fillStyle='#5a3010';
+  cx.beginPath(); cx.arc(ox-12,fy-128,2.5,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.arc(ox+12,fy-128,2.5,0,Math.PI*2); cx.fill();
+  cx.fillStyle='#111';
+  cx.beginPath(); cx.arc(ox-11,fy-128,1.5,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.arc(ox+11,fy-128,1.5,0,Math.PI*2); cx.fill();
+  // Eye shine
+  cx.fillStyle='rgba(255,255,255,0.9)';
+  cx.fillRect(ox-10,fy-131,2,2); cx.fillRect(ox+13,fy-131,2,2);
+
+  // Eyebrows (slightly furrowed - angry boss)
+  cx.fillStyle='#4a2808';
+  cx.save(); cx.translate(ox-14,fy-135); cx.rotate(0.22);
+  cx.beginPath(); cx.ellipse(6,0,9,2.5,0,0,Math.PI*2); cx.fill(); cx.restore();
+  cx.save(); cx.translate(ox+14,fy-135); cx.rotate(-0.22);
+  cx.beginPath(); cx.ellipse(-6,0,9,2.5,0,0,Math.PI*2); cx.fill(); cx.restore();
+
+  // Nose (small)
+  cx.fillStyle='rgba(180,120,80,0.5)';
+  cx.beginPath(); cx.ellipse(ox-4,fy-114,3,2,0,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.ellipse(ox+4,fy-114,3,2,0,0,Math.PI*2); cx.fill();
+
+  // POUTY LIPS (signature look from photo!) 💋
+  // Upper lip
+  cx.fillStyle='#c06070';
+  cx.beginPath();
+  cx.moveTo(ox-13,fy-107);
+  cx.bezierCurveTo(ox-8,fy-112, ox-3,fy-113, ox,fy-110);
+  cx.bezierCurveTo(ox+3,fy-113, ox+8,fy-112, ox+13,fy-107);
+  cx.bezierCurveTo(ox+6,fy-105, ox-6,fy-105, ox-13,fy-107);
+  cx.fill();
+  // Lower lip (pouty - pushed forward)
+  cx.fillStyle='#d07080';
+  cx.beginPath();
+  cx.moveTo(ox-12,fy-107);
+  cx.bezierCurveTo(ox-10,fy-100, ox-4,fy-97, ox,fy-96);
+  cx.bezierCurveTo(ox+4,fy-97, ox+10,fy-100, ox+12,fy-107);
+  cx.bezierCurveTo(ox+6,fy-106, ox-6,fy-106, ox-12,fy-107);
+  cx.fill();
+  // Lip line
+  cx.strokeStyle='#a04858'; cx.lineWidth=1;
+  cx.beginPath(); cx.moveTo(ox-12,fy-107); cx.lineTo(ox+12,fy-107); cx.stroke();
+
+  // Cheeks (slight blush)
+  cx.save(); cx.globalAlpha=0.18; cx.fillStyle='#ff8888';
+  cx.beginPath(); cx.ellipse(ox-20,fy-112,10,7,0,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.ellipse(ox+20,fy-112,10,7,0,0,Math.PI*2); cx.fill();
+  cx.restore();
+
+  // Small earrings
+  cx.fillStyle='#d4af37';
+  cx.beginPath(); cx.arc(ox-33,fy-124,3.5,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.arc(ox+33,fy-124,3.5,0,Math.PI*2); cx.fill();
+
+  // 👑 Crown (she's the boss after all)
   cx.fillStyle='#d4af37';
   cx.beginPath();
-  for(let i=0;i<6;i++){const a=(i/6)*Math.PI*2-Math.PI/2,r=i%2===0?7:3.5;i===0?cx.moveTo(ox+Math.cos(a)*r,fy-143+Math.sin(a)*r):cx.lineTo(ox+Math.cos(a)*r,fy-143+Math.sin(a)*r);}
+  cx.moveTo(ox-22,fy-170);
+  cx.lineTo(ox-18,fy-182); cx.lineTo(ox-8,fy-174);
+  cx.lineTo(ox,fy-186); cx.lineTo(ox+8,fy-174);
+  cx.lineTo(ox+18,fy-182); cx.lineTo(ox+22,fy-170);
   cx.closePath(); cx.fill();
+  cx.fillStyle='#ff4444'; cx.beginPath(); cx.arc(ox,fy-184,4,0,Math.PI*2); cx.fill();
+  cx.fillStyle='#4444ff'; cx.beginPath(); cx.arc(ox-18,fy-180,3,0,Math.PI*2); cx.fill();
+  cx.fillStyle='#44ff44'; cx.beginPath(); cx.arc(ox+18,fy-180,3,0,Math.PI*2); cx.fill();
 }
 
 // ═══════════════════════════════════════════════════════════════
