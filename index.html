@@ -260,31 +260,33 @@ function drawSoldier(ox,fy,dir,state,fr,isEnemy=false){
   cx.beginPath(); cx.arc(ox, hy, hR, 0, Math.PI*2); cx.fill();
 
   if(!isEnemy){
-    // ── HAIR (short, dark, wavy – no helmet) ──────────────────
-    const hairC = '#1a100a', hairC2 = '#2d1a0e';
-    // Base hair cap
+    // ── FULL HAIR (short dark, covers whole head under cap) ────
+    const hairC = '#1e1208', hairC2 = '#2e1a0c', hairC3 = '#3d2414';
+
+    // Full hair base - covers entire head
     cx.fillStyle = hairC;
-    cx.beginPath();
-    cx.arc(ox, hy, hR, Math.PI*1.1, Math.PI*1.9, false);
-    cx.lineTo(ox + hR*0.95, hy);
-    cx.arc(ox, hy, hR*0.82, Math.PI*1.9, Math.PI*1.1, true);
-    cx.closePath(); cx.fill();
-    // Wavy top texture
+    cx.beginPath(); cx.arc(ox, hy, hR+1, 0, Math.PI*2); cx.fill();
+
+    // Skin re-draw only on face area (lower half)
+    cx.fillStyle = '#c8986a';
+    cx.beginPath(); cx.arc(ox, hy, hR, Math.PI*0.05, Math.PI*0.95, false); cx.fill();
+
+    // Hair on sides (visible below cap, above ears)
+    cx.fillStyle = hairC;
+    cx.beginPath(); cx.ellipse(ox - hR*0.9, hy + hR*0.15, hR*0.22, hR*0.55, -0.08, 0, Math.PI*2); cx.fill();
+    cx.beginPath(); cx.ellipse(ox + hR*0.9, hy + hR*0.15, hR*0.22, hR*0.55,  0.08, 0, Math.PI*2); cx.fill();
+
+    // Sideburns
     cx.fillStyle = hairC2;
-    cx.beginPath();
-    cx.moveTo(ox - hR*0.7, hy - hR*0.6);
-    cx.bezierCurveTo(ox - hR*0.4, hy - hR*1.05, ox - hR*0.1, hy - hR*1.08, ox + hR*0.15, hy - hR*1.02);
-    cx.bezierCurveTo(ox + hR*0.4, hy - hR*0.95, ox + hR*0.65, hy - hR*0.75, ox + hR*0.75, hy - hR*0.55);
-    cx.arc(ox, hy, hR*0.82, Math.PI*1.82, Math.PI*1.18, true);
-    cx.closePath(); cx.fill();
-    // Hair highlight streaks
-    cx.fillStyle = '#3d2214';
-    cx.beginPath(); cx.ellipse(ox - hR*0.15, hy - hR*0.9, hR*0.22, hR*0.1, -0.3, 0, Math.PI*2); cx.fill();
-    cx.beginPath(); cx.ellipse(ox + hR*0.2,  hy - hR*0.88, hR*0.18, hR*0.08, 0.2, 0, Math.PI*2); cx.fill();
-    // Side fade (short sides)
-    cx.fillStyle = hairC;
-    cx.beginPath(); cx.ellipse(ox - hR*0.88, hy + hR*0.1, hR*0.18, hR*0.38, 0.1, 0, Math.PI*2); cx.fill();
-    cx.beginPath(); cx.ellipse(ox + hR*0.88, hy + hR*0.1, hR*0.18, hR*0.38, -0.1, 0, Math.PI*2); cx.fill();
+    cx.beginPath(); cx.ellipse(ox - hR*0.85, hy + hR*0.48, hR*0.14, hR*0.22, 0, 0, Math.PI*2); cx.fill();
+    cx.beginPath(); cx.ellipse(ox + hR*0.85, hy + hR*0.48, hR*0.14, hR*0.22, 0, 0, Math.PI*2); cx.fill();
+
+    // Hair texture streaks (wavy)
+    cx.fillStyle = hairC3;
+    cx.beginPath(); cx.ellipse(ox - hR*0.2, hy - hR*0.82, hR*0.25, hR*0.09, -0.25, 0, Math.PI*2); cx.fill();
+    cx.beginPath(); cx.ellipse(ox + hR*0.15, hy - hR*0.85, hR*0.2,  hR*0.08,  0.2,  0, Math.PI*2); cx.fill();
+    cx.beginPath(); cx.ellipse(ox - hR*0.55, hy - hR*0.7,  hR*0.18, hR*0.07, -0.4,  0, Math.PI*2); cx.fill();
+    cx.beginPath(); cx.ellipse(ox + hR*0.48, hy - hR*0.72, hR*0.18, hR*0.07,  0.4,  0, Math.PI*2); cx.fill();
 
     // ── BASEBALL CAP (מצחייה) ────────────────────────────────────
     const capC = '#4a6030', capD = '#3a4e24', capB = '#2e3e1c';
