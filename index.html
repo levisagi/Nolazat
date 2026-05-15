@@ -280,6 +280,69 @@ function drawSoldier(ox,fy,dir,state,fr,isEnemy=false){
     cx.beginPath(); cx.ellipse(ox - hR*0.88, hy + hR*0.1, hR*0.18, hR*0.38, 0.1, 0, Math.PI*2); cx.fill();
     cx.beginPath(); cx.ellipse(ox + hR*0.88, hy + hR*0.1, hR*0.18, hR*0.38, -0.1, 0, Math.PI*2); cx.fill();
 
+    // ── BASEBALL CAP (מצחייה) ────────────────────────────────────
+    const capC = '#4a6030', capD = '#3a4e24', capB = '#2e3e1c';
+    // Cap body (rounded top)
+    cx.fillStyle = capC;
+    cx.beginPath();
+    cx.arc(ox, hy, hR*1.06, Math.PI*1.05, Math.PI*1.95, false);
+    cx.lineTo(ox + hR*0.95, hy - hR*0.08);
+    cx.arc(ox, hy, hR*0.72, Math.PI*1.95, Math.PI*1.05, true);
+    cx.closePath(); cx.fill();
+    // Cap band (stripe at bottom of cap)
+    cx.fillStyle = capD;
+    cx.beginPath();
+    cx.arc(ox, hy, hR*1.06, Math.PI*1.78, Math.PI*1.22, true);
+    cx.arc(ox, hy, hR*0.88, Math.PI*1.22, Math.PI*1.78, false);
+    cx.closePath(); cx.fill();
+    // Cap button on top
+    cx.fillStyle = capB;
+    cx.beginPath(); cx.arc(ox, hy - hR*1.0, hR*0.1, 0, Math.PI*2); cx.fill();
+    // Cap seam line
+    cx.strokeStyle = capD; cx.lineWidth = 1;
+    cx.beginPath(); cx.arc(ox, hy, hR*0.98, Math.PI*1.15, Math.PI*1.85); cx.stroke();
+    // BRIM / VISOR (extends in facing direction)
+    const brimDir = dir; // 1=right, -1=left
+    cx.fillStyle = capC;
+    cx.beginPath();
+    cx.moveTo(ox + brimDir*hR*0.3, hy - hR*0.08);
+    cx.bezierCurveTo(
+      ox + brimDir*hR*0.5, hy - hR*0.18,
+      ox + brimDir*hR*1.5, hy - hR*0.1,
+      ox + brimDir*hR*1.6, hy + hR*0.05
+    );
+    cx.bezierCurveTo(
+      ox + brimDir*hR*1.5, hy + hR*0.18,
+      ox + brimDir*hR*0.4, hy + hR*0.12,
+      ox + brimDir*hR*0.2, hy + hR*0.05
+    );
+    cx.closePath(); cx.fill();
+    // Brim underside (darker)
+    cx.fillStyle = capB;
+    cx.beginPath();
+    cx.moveTo(ox + brimDir*hR*0.3, hy + hR*0.02);
+    cx.bezierCurveTo(
+      ox + brimDir*hR*0.5, hy + hR*0.1,
+      ox + brimDir*hR*1.5, hy + hR*0.12,
+      ox + brimDir*hR*1.6, hy + hR*0.05
+    );
+    cx.bezierCurveTo(
+      ox + brimDir*hR*1.5, hy + hR*0.18,
+      ox + brimDir*hR*0.4, hy + hR*0.14,
+      ox + brimDir*hR*0.2, hy + hR*0.06
+    );
+    cx.closePath(); cx.fill();
+    // Brim edge line
+    cx.strokeStyle = capB; cx.lineWidth = 1.2;
+    cx.beginPath();
+    cx.moveTo(ox + brimDir*hR*0.3, hy - hR*0.08);
+    cx.bezierCurveTo(
+      ox + brimDir*hR*0.5, hy - hR*0.18,
+      ox + brimDir*hR*1.5, hy - hR*0.1,
+      ox + brimDir*hR*1.6, hy + hR*0.05
+    );
+    cx.stroke();
+
     // ── EYES ────────────────────────────────────────────────────
     const ex1 = ox - hR*0.28, ex2 = ox + hR*0.28, ey = hy + hR*0.08;
     // Whites
