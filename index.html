@@ -154,7 +154,17 @@ const PLATS=[
 let GS='menu', SC=0, LZ=0, LV=1, lives=5, FC=0, diff=1;
 let bullets=[], enemies=[], cols=[], parts=[];
 let bossHp=15, bossMaxHp=15, plrBossHp=20, bossIntroT=0;
+let boss2Hp=15, boss2MaxHp=15, plrBoss2Hp=20, boss2IntroT=0;
 let eSpawnT=0, cSpawnT=0;
+
+const BOSS2_SPEECHES=[
+  'אורר תוריד לי קופון אני מוותר לך!!',
+  'שמעת אותי יא עפיפון ראש חציל',
+  'שאגיא לוי מה עם ביתן לא הגיע היום מה קרה',
+  'ביתן מה עם הרולד וילר',
+  'אורררר אמרתי לך תוריד קופון כבר',
+];
+const BOSS2={x:GW/2-45,y:GND-120,w:90,h:115,vx:2.5,vy:0,onG:0,face:-1,fr:0,sCD:0,spT:0,spTx:'',bullets:[]};
 
 const SPEECHES=[
   'אמיררר איפה אתההה??','ביתןן גם ברפאל אתה מגיע בעשר בבוקר??',
@@ -699,6 +709,298 @@ function drawBossHUD(){
   cx.fillText('♥ '+plrBossHp+'/20',GW/2,GND-23); cx.textAlign='left';
 }
 
+function drawBoss2HUD(){
+  const bw=280,bx=GW/2-bw/2;
+  cx.fillStyle='rgba(0,0,0,0.6)'; cx.fillRect(bx-4,44,bw+8,26);
+  cx.fillStyle='#001a44'; cx.fillRect(bx,48,bw,18);
+  const pct=boss2Hp/boss2MaxHp;
+  cx.fillStyle=pct>0.5?'#2266ff':pct>0.25?'#4488ff':'#0044cc';
+  cx.fillRect(bx,48,bw*pct,18);
+  cx.strokeStyle='#0055ff'; cx.lineWidth=1.5; cx.strokeRect(bx,48,bw,18);
+  cx.fillStyle='#fff'; cx.font='bold 11px Arial'; cx.textAlign='center';
+  cx.fillText('🚁 אמיר נאמן 🚁  ♥ '+boss2Hp+'/'+boss2MaxHp,GW/2,61); cx.textAlign='left';
+  const pw=160,px=GW/2-80;
+  cx.fillStyle='rgba(0,0,0,0.5)'; cx.fillRect(px-2,GND-34,pw+4,18);
+  cx.fillStyle='#001a44'; cx.fillRect(px,GND-32,pw,14);
+  cx.fillStyle='#4488ff'; cx.fillRect(px,GND-32,pw*(plrBoss2Hp/20),14);
+  cx.strokeStyle='#0066ff'; cx.lineWidth=1; cx.strokeRect(px,GND-32,pw,14);
+  cx.fillStyle='#fff'; cx.font='bold 9px Arial'; cx.textAlign='center';
+  cx.fillText('♥ '+plrBoss2Hp+'/20',GW/2,GND-23); cx.textAlign='left';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DAYTIME BACKGROUND (boss2)
+// ═══════════════════════════════════════════════════════════════
+function drawDayBG(){
+  // Sky - bright morning blue
+  const sky=cx.createLinearGradient(0,0,0,GND);
+  sky.addColorStop(0,'#5ab4e8'); sky.addColorStop(0.6,'#8ed4f5'); sky.addColorStop(1,'#c8eeff');
+  cx.fillStyle=sky; cx.fillRect(0,0,GW,GND);
+  // Sun
+  cx.save(); cx.shadowColor='#ffee44'; cx.shadowBlur=30;
+  cx.fillStyle='#ffe030';
+  cx.beginPath(); cx.arc(60,55,32,0,Math.PI*2); cx.fill();
+  cx.restore();
+  cx.fillStyle='rgba(255,230,80,0.25)';
+  cx.beginPath(); cx.arc(60,55,52,0,Math.PI*2); cx.fill();
+  // Clouds
+  [[130,60,1.1],[300,40,0.9],[420,75,1.0]].forEach(([cx2,cy2,s])=>{
+    cx.fillStyle='rgba(255,255,255,0.92)';
+    cx.beginPath(); cx.arc(cx2,cy2,28*s,0,Math.PI*2); cx.fill();
+    cx.beginPath(); cx.arc(cx2+30*s,cy2+5*s,22*s,0,Math.PI*2); cx.fill();
+    cx.beginPath(); cx.arc(cx2-20*s,cy2+8*s,20*s,0,Math.PI*2); cx.fill();
+    cx.beginPath(); cx.arc(cx2+55*s,cy2+10*s,18*s,0,Math.PI*2); cx.fill();
+  });
+  // Hills (green)
+  cx.fillStyle='#5a9e3a';
+  cx.beginPath(); cx.moveTo(0,GND-40);
+  cx.bezierCurveTo(100,GND-160,200,GND-120,300,GND-150);
+  cx.bezierCurveTo(380,GND-170,440,GND-100,GW,GND-70);
+  cx.lineTo(GW,GND); cx.lineTo(0,GND); cx.fill();
+
+  // ── ISRAELI FLAG (left side) ──────────────────────────────────
+  const fx=18, fy2=80, fw=110, fh=75;
+  // Flag pole
+  cx.fillStyle='#888'; cx.fillRect(fx-3,fy2-10,4,GND-fy2+10);
+  // White background
+  cx.fillStyle='#fff'; cx.fillRect(fx,fy2,fw,fh);
+  cx.strokeStyle='#ccc'; cx.lineWidth=1; cx.strokeRect(fx,fy2,fw,fh);
+  // Blue stripes
+  cx.fillStyle='#0038b8';
+  cx.fillRect(fx,fy2+10,fw,12); cx.fillRect(fx,fy2+fh-22,fw,12);
+  // Star of David
+  const sx=fx+fw/2, sy2=fy2+fh/2, sr=14;
+  cx.fillStyle='#0038b8';
+  cx.beginPath();
+  for(let i=0;i<6;i++){const a=(i/6)*Math.PI*2-Math.PI/2,r2=i%2===0?sr:sr*0.5;i===0?cx.moveTo(sx+Math.cos(a)*r2,sy2+Math.sin(a)*r2):cx.lineTo(sx+Math.cos(a)*r2,sy2+Math.sin(a)*r2);}
+  cx.closePath(); cx.fill();
+  // Inner hexagon (white)
+  cx.fillStyle='#fff';
+  cx.beginPath();
+  for(let i=0;i<6;i++){const a=(i/6)*Math.PI*2-Math.PI/2,r2=sr*0.38;i===0?cx.moveTo(sx+Math.cos(a)*r2,sy2+Math.sin(a)*r2):cx.lineTo(sx+Math.cos(a)*r2,sy2+Math.sin(a)*r2);}
+  cx.closePath(); cx.fill();
+
+  // ── BRIGADE 228 FLAG (right side) ────────────────────────────
+  const fx2=GW-130, fy3=80, fw2=110, fh2=75;
+  cx.fillStyle='#888'; cx.fillRect(fx2-3,fy3-10,4,GND-fy3+10);
+  // Orange + black flag (tiger brigade colors)
+  cx.fillStyle='#c85a00'; cx.fillRect(fx2,fy3,fw2,fh2);
+  cx.fillStyle='#1a0a00'; cx.fillRect(fx2,fy3,fw2,fh2/2);
+  // Tiger silhouette stripes
+  cx.fillStyle='rgba(255,140,0,0.6)';
+  for(let i=0;i<4;i++) cx.fillRect(fx2+12+i*22,fy3+5,8,fh2/2-10);
+  // Text "חטיבה 228"
+  cx.fillStyle='#fff'; cx.font='bold 9px Arial'; cx.textAlign='center'; cx.direction='rtl';
+  cx.fillText('חטיבה',fx2+fw2/2,fy3+fh2/2+16);
+  cx.fillText('228',fx2+fw2/2,fy3+fh2/2+28);
+  // Tiger text
+  cx.fillStyle='#ffaa44'; cx.font='bold 8px Arial';
+  cx.fillText('🐯 הנמרים',fx2+fw2/2,fy3+14);
+  cx.direction='ltr'; cx.textAlign='left';
+  // Flag border
+  cx.strokeStyle='#5a2a00'; cx.lineWidth=2; cx.strokeRect(fx2,fy3,fw2,fh2);
+
+  // Ground (green grass)
+  const g=cx.createLinearGradient(0,GND,0,GH);
+  g.addColorStop(0,'#4a8e2a'); g.addColorStop(1,'#2a5a10');
+  cx.fillStyle=g; cx.fillRect(0,GND,GW,GH-GND);
+  // Grass texture
+  cx.fillStyle='#3a7a1a';
+  for(let i=0;i<GW;i+=12) cx.fillRect(i,GND,6,4+(i%3));
+  // Road/path
+  cx.fillStyle='#8a7a5a'; cx.fillRect(GW/2-60,GND,120,GH-GND);
+  cx.strokeStyle='#fff'; cx.lineWidth=2; cx.setLineDash([15,12]);
+  cx.beginPath(); cx.moveTo(GW/2,GND); cx.lineTo(GW/2,GH); cx.stroke();
+  cx.setLineDash([]);
+  // Platforms
+  PLATS.slice(1).forEach(p=>{
+    cx.fillStyle='#5a8a3a'; cx.fillRect(p.x,p.y,p.w,p.h);
+    cx.fillStyle='#3a6a1a'; cx.fillRect(p.x+2,p.y+2,p.w-4,5);
+    cx.strokeStyle='#2a5a0a'; cx.lineWidth=1; cx.strokeRect(p.x,p.y,p.w,p.h);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SPRITE: BOSS2 - אמיר נאמן (suit, beard, helicopter)
+// ═══════════════════════════════════════════════════════════════
+function drawHelicopter(cx2,cy2,dir){
+  // Blue military helicopter
+  const HC='#1144aa', HD='#0d3388', HL='#3366cc';
+  // Body (main fuselage)
+  cx.fillStyle=HC;
+  cx.beginPath();
+  cx.ellipse(cx2,cy2,38,18,0,0,Math.PI*2); cx.fill();
+  cx.fillStyle=HD;
+  cx.beginPath(); cx.ellipse(cx2,cy2,38,18,0,Math.PI,Math.PI*2); cx.fill();
+  // Cockpit (glass)
+  cx.fillStyle='rgba(180,220,255,0.75)';
+  cx.beginPath(); cx.ellipse(cx2+dir*14,cy2-2,16,13,0,0,Math.PI*2); cx.fill();
+  cx.strokeStyle='#0d3388'; cx.lineWidth=1.5;
+  cx.beginPath(); cx.ellipse(cx2+dir*14,cy2-2,16,13,0,0,Math.PI*2); cx.stroke();
+  // Tail boom
+  cx.fillStyle=HC;
+  cx.beginPath();
+  cx.moveTo(cx2-dir*35,cy2-3); cx.lineTo(cx2-dir*35,cy2+3);
+  cx.lineTo(cx2-dir*72,cy2+1); cx.lineTo(cx2-dir*72,cy2-1);
+  cx.closePath(); cx.fill();
+  // Tail rotor
+  cx.fillStyle=HD; cx.lineWidth=2; cx.strokeStyle=HL;
+  cx.beginPath(); cx.arc(cx2-dir*72,cy2,8,0,Math.PI*2); cx.stroke();
+  const tAngle=(FC*0.18)%(Math.PI*2);
+  for(let i=0;i<3;i++){
+    const a=tAngle+i*(Math.PI*2/3);
+    cx.beginPath(); cx.moveTo(cx2-dir*72,cy2); cx.lineTo(cx2-dir*72+Math.cos(a)*8,cy2+Math.sin(a)*8);
+    cx.strokeStyle=HL; cx.lineWidth=2; cx.stroke();
+  }
+  // Skids
+  cx.strokeStyle=HD; cx.lineWidth=3;
+  cx.beginPath(); cx.moveTo(cx2-22,cy2+14); cx.lineTo(cx2-22,cy2+22); cx.lineTo(cx2+22,cy2+22); cx.lineTo(cx2+22,cy2+14); cx.stroke();
+  cx.beginPath(); cx.moveTo(cx2-30,cy2+22); cx.lineTo(cx2+30,cy2+22); cx.stroke();
+  // Main rotor (spinning)
+  const rAngle=(FC*0.15)%(Math.PI*2);
+  cx.strokeStyle='#2255bb'; cx.lineWidth=4;
+  for(let i=0;i<2;i++){
+    const a=rAngle+i*(Math.PI);
+    cx.beginPath();
+    cx.moveTo(cx2+Math.cos(a)*55,cy2-10+Math.sin(a)*8);
+    cx.lineTo(cx2-Math.cos(a)*55,cy2-10-Math.sin(a)*8);
+    cx.stroke();
+  }
+  // Rotor hub
+  cx.fillStyle=HD; cx.beginPath(); cx.arc(cx2,cy2-10,5,0,Math.PI*2); cx.fill();
+  // Israeli Air Force roundel
+  cx.fillStyle='#0038b8'; cx.beginPath(); cx.arc(cx2-10,cy2+2,7,0,Math.PI*2); cx.fill();
+  cx.fillStyle='#fff'; cx.beginPath(); cx.arc(cx2-10,cy2+2,5,0,Math.PI*2); cx.fill();
+  cx.fillStyle='#0038b8'; cx.beginPath(); cx.arc(cx2-10,cy2+2,3,0,Math.PI*2); cx.fill();
+}
+
+function drawBoss2Sprite(ox,fy,dir){
+  const SK='#c8906a', HR='#1a0c06';
+  // Suit legs (dark trousers)
+  cx.fillStyle='#1a1a2a';
+  cx.fillRect(ox-20,fy-50,17,46); cx.fillRect(ox+5,fy-50,17,46);
+  // Shoes (shiny black)
+  cx.fillStyle='#0a0a12';
+  cx.fillRect(ox-22,fy-16,24,16); cx.fillRect(ox+0,fy-16,24,16);
+  // Suit jacket (dark charcoal)
+  cx.fillStyle='#1e1e2e'; cx.fillRect(ox-26,fy-102,52,56);
+  // White shirt
+  cx.fillStyle='#f0f0f8';
+  cx.beginPath(); cx.moveTo(ox-8,fy-102); cx.lineTo(ox,fy-88); cx.lineTo(ox+8,fy-102); cx.fill();
+  cx.fillRect(ox-5,fy-88,10,30);
+  // Red tie
+  cx.fillStyle='#aa1122';
+  cx.beginPath(); cx.moveTo(ox-4,fy-90); cx.lineTo(ox+4,fy-90); cx.lineTo(ox+3,fy-65); cx.lineTo(ox,fy-60); cx.lineTo(ox-3,fy-65); cx.closePath(); cx.fill();
+  // Lapels
+  cx.fillStyle='#2a2a3a';
+  cx.beginPath(); cx.moveTo(ox-8,fy-102); cx.lineTo(ox-22,fy-90); cx.lineTo(ox-12,fy-80); cx.lineTo(ox,fy-88); cx.closePath(); cx.fill();
+  cx.beginPath(); cx.moveTo(ox+8,fy-102); cx.lineTo(ox+22,fy-90); cx.lineTo(ox+12,fy-80); cx.lineTo(ox,fy-88); cx.closePath(); cx.fill();
+  // Arms
+  cx.fillStyle='#1e1e2e';
+  cx.fillRect(ox-40,fy-100,16,45); cx.fillRect(ox+26,fy-100,16,45);
+  // Cuffs + hands
+  cx.fillStyle='#f0f0f8'; cx.fillRect(ox-40,fy-60,16,7); cx.fillRect(ox+26,fy-60,16,7);
+  cx.fillStyle=SK; cx.fillRect(ox-40,fy-55,16,12); cx.fillRect(ox+26,fy-55,16,12);
+  // Neck
+  cx.fillStyle=SK; cx.fillRect(ox-7,fy-108,14,10);
+  // BIG HEAD
+  const hR=30, hy=fy-108-hR;
+  cx.fillStyle=SK;
+  cx.beginPath(); cx.arc(ox,hy,hR,0,Math.PI*2); cx.fill();
+  // Full dark hair on top
+  cx.fillStyle=HR;
+  cx.beginPath(); cx.arc(ox,hy,hR+1,0,Math.PI*2); cx.fill();
+  // Skin on face only
+  cx.fillStyle=SK;
+  cx.beginPath(); cx.arc(ox,hy,hR,Math.PI*0.08,Math.PI*0.92,false); cx.fill();
+  // Short curly hair texture
+  cx.fillStyle='#2a1408';
+  cx.beginPath(); cx.ellipse(ox-hR*0.2,hy-hR*0.85,hR*0.22,hR*0.1,-0.2,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.ellipse(ox+hR*0.15,hy-hR*0.88,hR*0.2,hR*0.09,0.2,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.ellipse(ox-hR*0.55,hy-hR*0.72,hR*0.18,hR*0.08,-0.3,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.ellipse(ox+hR*0.5,hy-hR*0.7,hR*0.18,hR*0.08,0.3,0,Math.PI*2); cx.fill();
+  // Side hair
+  cx.fillStyle=HR;
+  cx.beginPath(); cx.ellipse(ox-hR*0.9,hy+hR*0.1,hR*0.2,hR*0.5,0.05,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.ellipse(ox+hR*0.9,hy+hR*0.1,hR*0.2,hR*0.5,-0.05,0,Math.PI*2); cx.fill();
+  // Eyes
+  const ex1=ox-hR*0.3,ex2=ox+hR*0.3,ey=hy+hR*0.1;
+  cx.fillStyle='#f0ebe0';
+  cx.beginPath(); cx.ellipse(ex1,ey,hR*0.2,hR*0.13,0,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.ellipse(ex2,ey,hR*0.2,hR*0.13,0,0,Math.PI*2); cx.fill();
+  cx.fillStyle='#2e1206';
+  cx.beginPath(); cx.arc(ex1,ey,hR*0.12,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.arc(ex2,ey,hR*0.12,0,Math.PI*2); cx.fill();
+  cx.fillStyle='#080402';
+  cx.beginPath(); cx.arc(ex1,ey,hR*0.07,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.arc(ex2,ey,hR*0.07,0,Math.PI*2); cx.fill();
+  cx.fillStyle='rgba(255,255,255,0.85)';
+  cx.beginPath(); cx.arc(ex1+hR*0.05,ey-hR*0.04,hR*0.04,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.arc(ex2+hR*0.05,ey-hR*0.04,hR*0.04,0,Math.PI*2); cx.fill();
+  // Eyebrows (dark, thick)
+  cx.fillStyle='#120806';
+  cx.beginPath(); cx.ellipse(ex1,ey-hR*0.23,hR*0.22,hR*0.09,-0.1,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.ellipse(ex2,ey-hR*0.23,hR*0.22,hR*0.09,0.1,0,Math.PI*2); cx.fill();
+  // Nose
+  cx.fillStyle='rgba(150,80,40,0.3)';
+  cx.beginPath(); cx.ellipse(ox-hR*0.08,hy+hR*0.3,hR*0.1,hR*0.07,0.3,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.ellipse(ox+hR*0.08,hy+hR*0.3,hR*0.1,hR*0.07,-0.3,0,Math.PI*2); cx.fill();
+  // Big smile with teeth
+  const my=hy+hR*0.54;
+  cx.fillStyle='#3a0808';
+  cx.beginPath(); cx.ellipse(ox,my,hR*0.38,hR*0.2,0,0,Math.PI); cx.fill();
+  cx.fillStyle='#f2f0e8';
+  cx.beginPath(); cx.ellipse(ox,my-hR*0.02,hR*0.33,hR*0.13,0,0,Math.PI); cx.fill();
+  cx.strokeStyle='#ddd5c0'; cx.lineWidth=0.9;
+  [-hR*0.12,0,hR*0.12].forEach(tx=>{cx.beginPath();cx.moveTo(ox+tx,my-hR*0.13);cx.lineTo(ox+tx,my+hR*0.01);cx.stroke();});
+  cx.strokeStyle='rgba(160,70,40,0.4)'; cx.lineWidth=1.8;
+  cx.beginPath(); cx.arc(ox-hR*0.55,my-hR*0.05,hR*0.18,Math.PI*1.3,Math.PI*1.85); cx.stroke();
+  cx.beginPath(); cx.arc(ox+hR*0.55,my-hR*0.05,hR*0.18,Math.PI*1.15,Math.PI*1.7); cx.stroke();
+  // FULL BEARD (dark, well-groomed - like the photo)
+  cx.fillStyle='rgba(18,8,2,0.75)';
+  // Jaw coverage
+  cx.beginPath(); cx.ellipse(ox,hy+hR*0.62,hR*0.72,hR*0.42,0,0,Math.PI*2); cx.fill();
+  // Chin
+  cx.beginPath(); cx.ellipse(ox,hy+hR*0.82,hR*0.35,hR*0.25,0,0,Math.PI*2); cx.fill();
+  // Cheeks
+  cx.beginPath(); cx.ellipse(ox-hR*0.45,hy+hR*0.42,hR*0.22,hR*0.35,0.2,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.ellipse(ox+hR*0.45,hy+hR*0.42,hR*0.22,hR*0.35,-0.2,0,Math.PI*2); cx.fill();
+  // Moustache
+  cx.beginPath(); cx.ellipse(ox,my-hR*0.18,hR*0.28,hR*0.1,0,0,Math.PI*2); cx.fill();
+  // Re-show teeth area over beard
+  cx.fillStyle='rgba(250,240,220,0.85)';
+  cx.beginPath(); cx.ellipse(ox,my-hR*0.04,hR*0.3,hR*0.12,0,0,Math.PI); cx.fill();
+  // Beard texture dots
+  cx.fillStyle='rgba(10,4,1,0.45)';
+  for(let i=0;i<22;i++) cx.fillRect(ox-hR*0.55+i*hR*0.055,hy+hR*0.55+Math.sin(i*1.8)*hR*0.14,1.5,1.5);
+}
+
+function drawCoupon(b){
+  // Coupon projectile - looks like money/discount voucher
+  cx.save();
+  cx.translate(b.x,b.y);
+  cx.rotate(FC*0.1);
+  cx.fillStyle='#22aa44'; cx.strokeStyle='#116622'; cx.lineWidth=1.5;
+  cx.beginPath(); if(cx.roundRect)cx.roundRect(-14,-9,28,18,3); else cx.rect(-14,-9,28,18); cx.fill(); cx.stroke();
+  cx.fillStyle='#fff'; cx.font='bold 8px Arial'; cx.textAlign='center';
+  cx.fillText('50%',0,4);
+  cx.fillStyle='#ffee00'; cx.font='bold 6px Arial';
+  cx.fillText('₪ קופון',0,-2);
+  cx.restore();
+}
+
+function drawBoss2Intro(){
+  cx.fillStyle='rgba(0,0,80,0.6)'; cx.fillRect(0,0,GW,GH);
+  const prog=Math.min(1,(200-boss2IntroT)/60);
+  cx.save(); cx.globalAlpha=prog;
+  cx.shadowColor='#4488ff'; cx.shadowBlur=50;
+  cx.fillStyle='#4488ff'; cx.font='bold 36px "Courier New"'; cx.textAlign='center';
+  cx.fillText('🚁 BOSS 2 🚁',GW/2,GH/2-30);
+  cx.fillStyle='#aaccff'; cx.font='bold 24px Arial';
+  cx.fillText('אמיר נאמן מגיע!!!',GW/2,GH/2+18);
+  cx.restore(); cx.textAlign='left';
+}
+
 // ═══════════════════════════════════════════════════════════════
 // PHYSICS
 // ═══════════════════════════════════════════════════════════════
@@ -898,13 +1200,56 @@ function updBoss(){
     if(b.boss) return true;
     if(cRect(b.x,b.y,b.r,BOSS.x,BOSS.y,BOSS.w,BOSS.h)){
       bossHp--; spark(b.x,b.y,'#ff8800',7);
-      if(bossHp<=0){sfxWin();GS='win';stopBG();
+      if(bossHp<=0){sfxWin();GS='boss2intro';boss2IntroT=200;stopBG();
         for(let i=0;i<5;i++) setTimeout(()=>spark(BOSS.x+BOSS.w/2+Math.random()*60-30,BOSS.y+Math.random()*60,['#ffff00','#ff8800','#ff44ff','#00ffff'][Math.floor(Math.random()*4)],16),i*200);}
       return false;
     }
     return true;
   });
   if(BOSS.spT>0) BOSS.spT--; else if(Math.random()<0.006){BOSS.spTx='אוררר אני אחסל אותך!';BOSS.spT=160;}
+}
+
+function initBoss2(){
+  BOSS2.x=GW/2-BOSS2.w/2; BOSS2.y=GND-BOSS2.h; BOSS2.vx=2.5; BOSS2.vy=0;
+  BOSS2.bullets=[]; BOSS2.sCD=80; boss2Hp=boss2MaxHp; plrBoss2Hp=20;
+  BOSS2.spTx=BOSS2_SPEECHES[0]; BOSS2.spT=260;
+  setTimeout(()=>{P.spTx='אמיר תפוס קופון!';P.spT=220;},1800);
+}
+function updBoss2(){
+  BOSS2.fr++;
+  BOSS2.vx=Math.sin(FC*0.022)*(3+diff*0.8);
+  if(Math.random()<0.012&&BOSS2.onG) BOSS2.vy=-13;
+  phys(BOSS2);
+  BOSS2.x=Math.max(10,Math.min(GW-BOSS2.w-10,BOSS2.x));
+  BOSS2.face=BOSS2.vx>=0?1:-1;
+  BOSS2.sCD--;
+  if(BOSS2.sCD<=0){
+    const dx=(P.x+P.w/2)-(BOSS2.x+BOSS2.w/2),dy=(P.y+P.h/2)-(BOSS2.y+BOSS2.h/2);
+    const d=Math.hypot(dx,dy),sp=2.8+diff*0.3;
+    BOSS2.bullets.push({x:BOSS2.x+BOSS2.w/2,y:BOSS2.y+BOSS2.h/2-30,vx:(dx/d)*sp,vy:(dy/d)*sp,r:14});
+    BOSS2.sCD=Math.max(55,130-diff*10); sfxShoot();
+  }
+  BOSS2.bullets=BOSS2.bullets.filter(b=>{
+    b.x+=b.vx; b.y+=b.vy;
+    if(b.x<-40||b.x>GW+40||b.y<-60||b.y>GH) return false;
+    if(P.inv<=0&&cRect(b.x,b.y,b.r,P.x,P.y,P.w,P.h)){
+      plrBoss2Hp--; P.inv=90; sfxHit(); spark(P.x+P.w/2,P.y+P.h/2,'#ff4444',10);
+      if(plrBoss2Hp<=0){sfxGO();GS='gameover';stopBG();}
+      return false;
+    }
+    return true;
+  });
+  bullets=bullets.filter(b=>{
+    if(b.boss) return true;
+    if(cRect(b.x,b.y,b.r,BOSS2.x,BOSS2.y,BOSS2.w,BOSS2.h)){
+      boss2Hp--; spark(b.x,b.y,'#4488ff',7);
+      if(boss2Hp<=0){sfxWin();GS='win';stopBG();
+        for(let i=0;i<5;i++) setTimeout(()=>spark(BOSS2.x+BOSS2.w/2+Math.random()*60-30,BOSS2.y+Math.random()*60,['#ffff00','#4488ff','#ff44ff','#00ffff'][Math.floor(Math.random()*4)],16),i*200);}
+      return false;
+    }
+    return true;
+  });
+  if(BOSS2.spT>0) BOSS2.spT--; else if(Math.random()<0.006){BOSS2.spTx=BOSS2_SPEECHES[Math.floor(Math.random()*BOSS2_SPEECHES.length)];BOSS2.spT=160;}
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -957,7 +1302,7 @@ function drawWin(){
   cx.fillStyle='#ffee00'; cx.font='bold 40px "Courier New"'; cx.textAlign='center';
   cx.fillText('🏆 ניצחת! 🏆',GW/2,GH/2-75); cx.restore();
   cx.fillStyle='#00ff88'; cx.font='bold 20px Arial'; cx.textAlign='center';
-  cx.fillText('הכית את אנה!',GW/2,GH/2-38);
+  cx.fillText('הכית את אנה ואמיר נאמן!',GW/2,GH/2-38);
   cx.fillText('ניקוד: '+SC,GW/2,GH/2);
   cx.fillStyle='#ffff88'; cx.font='bold 15px Arial';
   cx.fillText('יום יבוא ואני אהיה מליונר! 💰',GW/2,GH/2+38);
@@ -982,7 +1327,7 @@ function drawBossIntro(){
 // ═══════════════════════════════════════════════════════════════
 function startGame(){
   GS='playing'; SC=0; LZ=0; LV=1; lives=5; diff=1;
-  bullets=[]; enemies=[]; cols=[]; parts=[]; BOSS.bullets=[];
+  bullets=[]; enemies=[]; cols=[]; parts=[]; BOSS.bullets=[]; BOSS2.bullets=[];
   plrBossHp=20; eSpawnT=0; cSpawnT=0;
   P.x=GW/2-P.w/2; P.y=GND-P.h-5; P.vx=0; P.vy=0;
   P.inv=0; P.sCD=0; P.spT=80; P.spTx='לא לזעתתתתת!!!'; P.face=1;
@@ -1025,10 +1370,29 @@ function loop(){
       cx.globalAlpha=1;
       if(P.spT>0) speech(P.x+P.w/2,P.y,P.spTx);
       drawParts(); drawHUD(); drawBossHUD();
+    } else if(GS==='boss2intro'){
+      drawDayBG();
+      if(P.inv>0&&P.inv%6<3) cx.globalAlpha=0.3;
+      drawSoldier(P.x+P.w/2,P.y+P.h,P.face,P.state,P.fr,false);
+      cx.globalAlpha=1;
+      updParts(); drawParts(); drawHUD(); drawBoss2Intro();
+      boss2IntroT--;
+      if(boss2IntroT<=0){GS='boss2';initBoss2();enemies=[];bullets=[];cols=[];startBG();}
+    } else if(GS==='boss2'){
+      drawDayBG(); updPlayer(); updBoss2(); updBullets(); updParts();
+      drawHelicopter(BOSS2.x+BOSS2.w/2,BOSS2.y-70,BOSS2.face);
+      BOSS2.bullets.forEach(drawCoupon); bullets.forEach(drawBullet);
+      drawBoss2Sprite(BOSS2.x+BOSS2.w/2,BOSS2.y+BOSS2.h,BOSS2.face);
+      if(BOSS2.spT>0) speech(BOSS2.x+BOSS2.w/2,BOSS2.y,BOSS2.spTx);
+      if(P.inv>0&&P.inv%6<3) cx.globalAlpha=0.3;
+      drawSoldier(P.x+P.w/2,P.y+P.h,P.face,P.state,P.fr,false);
+      cx.globalAlpha=1;
+      if(P.spT>0) speech(P.x+P.w/2,P.y,P.spTx);
+      drawParts(); drawHUD(); drawBoss2HUD();
     } else if(GS==='gameover'){
       drawBG(); updParts(); drawParts(); drawGO();
     } else if(GS==='win'){
-      drawBG(); updParts(); drawParts(); drawWin();
+      drawDayBG(); updParts(); drawParts(); drawWin();
     }
   } catch(e) {
     cx.fillStyle='#001100'; cx.fillRect(0,0,GW,GH);
