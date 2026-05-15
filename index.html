@@ -241,113 +241,131 @@ function drawSoldier(ox,fy,dir,state,fr,isEnemy=false){
   cx.save(); cx.translate(ox+13,fy-52); cx.rotate(-aS*0.05*dir);
   cx.fillRect(0,0,10,22); cx.fillStyle=SK; cx.fillRect(0,20,10,10); cx.restore();
 
-  // BIG HEAD (player bigger than enemy)
-  const hR=isEnemy?15:20;
-  // Olive/Mediterranean skin tone
-  const faceSK = isEnemy ? SK : '#c8986a';
-  cx.fillStyle=faceSK;
-  cx.beginPath(); cx.arc(ox,fy-70-hR*0.4,hR+2,0,Math.PI*2); cx.fill();
+  // HEAD SIZE: player = BIG (28), enemy = small (15)
+  const hR = isEnemy ? 15 : 28;
+  const hy  = fy - 62 - hR; // head center Y (sits on torso)
+
+  // Neck
+  cx.fillStyle = isEnemy ? SK : '#c8986a';
+  cx.fillRect(ox-6, fy-60, 12, 10);
+
+  // HEAD SHAPE
+  cx.fillStyle = isEnemy ? SK : '#c8986a';
+  cx.beginPath(); cx.arc(ox, hy, hR, 0, Math.PI*2); cx.fill();
 
   if(!isEnemy){
-    const hy = fy-70-hR*0.4; // head center Y
-    // --- Dark short hair on top (visible under helmet) ---
-    cx.fillStyle='#1a1008';
-    cx.beginPath(); cx.arc(ox,hy,hR+2,Math.PI*0.75,Math.PI*0.25,true); cx.fill();
-    // Slightly wavy hair texture
-    cx.fillStyle='#2a1a10';
-    cx.fillRect(ox-8,hy-hR,5,4); cx.fillRect(ox-2,hy-hR-2,6,4); cx.fillRect(ox+5,hy-hR,5,4);
+    // ── HAIR (short, dark, wavy – no helmet) ──────────────────
+    const hairC = '#1a100a', hairC2 = '#2d1a0e';
+    // Base hair cap
+    cx.fillStyle = hairC;
+    cx.beginPath();
+    cx.arc(ox, hy, hR, Math.PI*1.1, Math.PI*1.9, false);
+    cx.lineTo(ox + hR*0.95, hy);
+    cx.arc(ox, hy, hR*0.82, Math.PI*1.9, Math.PI*1.1, true);
+    cx.closePath(); cx.fill();
+    // Wavy top texture
+    cx.fillStyle = hairC2;
+    cx.beginPath();
+    cx.moveTo(ox - hR*0.7, hy - hR*0.6);
+    cx.bezierCurveTo(ox - hR*0.4, hy - hR*1.05, ox - hR*0.1, hy - hR*1.08, ox + hR*0.15, hy - hR*1.02);
+    cx.bezierCurveTo(ox + hR*0.4, hy - hR*0.95, ox + hR*0.65, hy - hR*0.75, ox + hR*0.75, hy - hR*0.55);
+    cx.arc(ox, hy, hR*0.82, Math.PI*1.82, Math.PI*1.18, true);
+    cx.closePath(); cx.fill();
+    // Hair highlight streaks
+    cx.fillStyle = '#3d2214';
+    cx.beginPath(); cx.ellipse(ox - hR*0.15, hy - hR*0.9, hR*0.22, hR*0.1, -0.3, 0, Math.PI*2); cx.fill();
+    cx.beginPath(); cx.ellipse(ox + hR*0.2,  hy - hR*0.88, hR*0.18, hR*0.08, 0.2, 0, Math.PI*2); cx.fill();
+    // Side fade (short sides)
+    cx.fillStyle = hairC;
+    cx.beginPath(); cx.ellipse(ox - hR*0.88, hy + hR*0.1, hR*0.18, hR*0.38, 0.1, 0, Math.PI*2); cx.fill();
+    cx.beginPath(); cx.ellipse(ox + hR*0.88, hy + hR*0.1, hR*0.18, hR*0.38, -0.1, 0, Math.PI*2); cx.fill();
 
-    // --- Eyes (dark brown, almond shape) ---
-    const eOff=dir>0?6:-6;
-    // Eye whites
-    cx.fillStyle='#f5f0e8';
-    cx.beginPath(); cx.ellipse(ox+eOff,hy+4,4.5,3,0,0,Math.PI*2); cx.fill();
-    cx.beginPath(); cx.ellipse(ox-eOff*0.4,hy+4,4.5,3,0,0,Math.PI*2); cx.fill();
-    // Iris - dark brown
-    cx.fillStyle='#3a2008';
-    cx.beginPath(); cx.arc(ox+eOff,hy+4,2.8,0,Math.PI*2); cx.fill();
-    cx.beginPath(); cx.arc(ox-eOff*0.4,hy+4,2.8,0,Math.PI*2); cx.fill();
+    // ── EYES ────────────────────────────────────────────────────
+    const ex1 = ox - hR*0.28, ex2 = ox + hR*0.28, ey = hy + hR*0.08;
+    // Whites
+    cx.fillStyle = '#f5f0e8';
+    cx.beginPath(); cx.ellipse(ex1, ey, hR*0.2, hR*0.13, 0, 0, Math.PI*2); cx.fill();
+    cx.beginPath(); cx.ellipse(ex2, ey, hR*0.2, hR*0.13, 0, 0, Math.PI*2); cx.fill();
+    // Iris (dark brown)
+    cx.fillStyle = '#2e1606';
+    cx.beginPath(); cx.arc(ex1, ey, hR*0.12, 0, Math.PI*2); cx.fill();
+    cx.beginPath(); cx.arc(ex2, ey, hR*0.12, 0, Math.PI*2); cx.fill();
     // Pupil
-    cx.fillStyle='#0a0805';
-    cx.beginPath(); cx.arc(ox+eOff,hy+4,1.6,0,Math.PI*2); cx.fill();
-    cx.beginPath(); cx.arc(ox-eOff*0.4,hy+4,1.6,0,Math.PI*2); cx.fill();
-    // Eye shine
-    cx.fillStyle='rgba(255,255,255,0.85)';
-    cx.beginPath(); cx.arc(ox+eOff+1.2,hy+3,0.9,0,Math.PI*2); cx.fill();
-    cx.beginPath(); cx.arc(ox-eOff*0.4+1.2,hy+3,0.9,0,Math.PI*2); cx.fill();
+    cx.fillStyle = '#080402';
+    cx.beginPath(); cx.arc(ex1, ey, hR*0.07, 0, Math.PI*2); cx.fill();
+    cx.beginPath(); cx.arc(ex2, ey, hR*0.07, 0, Math.PI*2); cx.fill();
+    // Shine
+    cx.fillStyle = 'rgba(255,255,255,0.9)';
+    cx.beginPath(); cx.arc(ex1 + hR*0.05, ey - hR*0.04, hR*0.04, 0, Math.PI*2); cx.fill();
+    cx.beginPath(); cx.arc(ex2 + hR*0.05, ey - hR*0.04, hR*0.04, 0, Math.PI*2); cx.fill();
+    // Eyelid line
+    cx.strokeStyle = '#1a0a04'; cx.lineWidth = 1.2;
+    cx.beginPath(); cx.ellipse(ex1, ey, hR*0.2, hR*0.12, 0, Math.PI, Math.PI*2); cx.stroke();
+    cx.beginPath(); cx.ellipse(ex2, ey, hR*0.2, hR*0.12, 0, Math.PI, Math.PI*2); cx.stroke();
 
-    // --- Thick dark eyebrows ---
-    cx.fillStyle='#1a0e05';
-    cx.beginPath(); cx.ellipse(ox+eOff,hy-2,6,2.2,dir>0?0.1:-0.1,0,Math.PI*2); cx.fill();
-    cx.beginPath(); cx.ellipse(ox-eOff*0.4,hy-2,6,2.2,dir>0?-0.1:0.1,0,Math.PI*2); cx.fill();
+    // ── EYEBROWS (thick, dark, slightly arched) ─────────────────
+    cx.fillStyle = '#150a02';
+    cx.beginPath(); cx.ellipse(ex1, ey - hR*0.22, hR*0.22, hR*0.08, -0.12, 0, Math.PI*2); cx.fill();
+    cx.beginPath(); cx.ellipse(ex2, ey - hR*0.22, hR*0.22, hR*0.08,  0.12, 0, Math.PI*2); cx.fill();
 
-    // --- Big open smile with teeth (חיוך גדול!) ---
-    // Mouth opening
-    cx.fillStyle='#5a1a1a';
-    cx.beginPath();
-    cx.ellipse(ox,hy+13,9,5.5,0,0,Math.PI); cx.fill();
-    // Teeth (white strip)
-    cx.fillStyle='#f8f8f0';
-    cx.beginPath();
-    cx.ellipse(ox,hy+11,8,3.5,0,0,Math.PI); cx.fill();
-    // Tooth line
-    cx.strokeStyle='#ddd8c8'; cx.lineWidth=0.8;
-    cx.beginPath(); cx.moveTo(ox,hy+9); cx.lineTo(ox,hy+14); cx.stroke();
-    cx.beginPath(); cx.moveTo(ox-4,hy+9); cx.lineTo(ox-4,hy+13.5); cx.stroke();
-    cx.beginPath(); cx.moveTo(ox+4,hy+9); cx.lineTo(ox+4,hy+13.5); cx.stroke();
-    // Smile cheek lines
-    cx.strokeStyle='rgba(160,80,50,0.4)'; cx.lineWidth=1.5;
-    cx.beginPath(); cx.arc(ox-11,hy+10,5,Math.PI*1.4,Math.PI*1.9); cx.stroke();
-    cx.beginPath(); cx.arc(ox+11,hy+10,5,Math.PI*1.1,Math.PI*1.6); cx.stroke();
+    // ── NOSE (subtle) ───────────────────────────────────────────
+    cx.fillStyle = 'rgba(150,80,40,0.3)';
+    cx.beginPath(); cx.ellipse(ox - hR*0.07, hy + hR*0.3, hR*0.09, hR*0.06, 0.3, 0, Math.PI*2); cx.fill();
+    cx.beginPath(); cx.ellipse(ox + hR*0.07, hy + hR*0.3, hR*0.09, hR*0.06,-0.3, 0, Math.PI*2); cx.fill();
 
-    // --- Stubble / short beard (dark) ---
-    cx.fillStyle='rgba(30,15,5,0.55)';
-    // Chin area
-    cx.beginPath(); cx.ellipse(ox,hy+18,9,5,0,0,Math.PI*2); cx.fill();
-    // Jawline sides
-    cx.beginPath(); cx.ellipse(ox-10,hy+12,4,6,0.3,0,Math.PI*2); cx.fill();
-    cx.beginPath(); cx.ellipse(ox+10,hy+12,4,6,-0.3,0,Math.PI*2); cx.fill();
-    // Above lip
-    cx.fillStyle='rgba(25,12,3,0.4)';
-    cx.beginPath(); cx.ellipse(ox,hy+8,7,2,0,0,Math.PI*2); cx.fill();
-    // Stubble dots
-    cx.fillStyle='rgba(20,10,2,0.5)';
-    for(let i=0;i<14;i++){
-      const sx=ox-10+i*1.6, sy=hy+14+Math.sin(i*2.3)*3;
-      cx.fillRect(sx,sy,1.2,1.2);
+    // ── BIG SMILE WITH TEETH ────────────────────────────────────
+    const my = hy + hR*0.52;
+    // Mouth shadow
+    cx.fillStyle = '#4a1010';
+    cx.beginPath(); cx.ellipse(ox, my, hR*0.38, hR*0.2, 0, 0, Math.PI); cx.fill();
+    // Teeth
+    cx.fillStyle = '#f4f2ea';
+    cx.beginPath(); cx.ellipse(ox, my - hR*0.02, hR*0.33, hR*0.14, 0, 0, Math.PI); cx.fill();
+    // Tooth dividers
+    cx.strokeStyle = '#ddd5c0'; cx.lineWidth = 0.9;
+    [-hR*0.12, 0, hR*0.12].forEach(tx => {
+      cx.beginPath(); cx.moveTo(ox+tx, my - hR*0.14); cx.lineTo(ox+tx, my + hR*0.01); cx.stroke();
+    });
+    // Smile dimples / cheek lines
+    cx.strokeStyle = 'rgba(170,80,50,0.45)'; cx.lineWidth = 1.8;
+    cx.beginPath(); cx.arc(ox - hR*0.52, my - hR*0.05, hR*0.18, Math.PI*1.3, Math.PI*1.85); cx.stroke();
+    cx.beginPath(); cx.arc(ox + hR*0.52, my - hR*0.05, hR*0.18, Math.PI*1.15, Math.PI*1.7); cx.stroke();
+
+    // ── STUBBLE & BEARD (dark, short) ───────────────────────────
+    cx.fillStyle = 'rgba(22,10,3,0.5)';
+    // Chin
+    cx.beginPath(); cx.ellipse(ox, hy + hR*0.75, hR*0.32, hR*0.2, 0, 0, Math.PI*2); cx.fill();
+    // Jaw sides
+    cx.beginPath(); cx.ellipse(ox - hR*0.42, hy + hR*0.5, hR*0.14, hR*0.28, 0.25, 0, Math.PI*2); cx.fill();
+    cx.beginPath(); cx.ellipse(ox + hR*0.42, hy + hR*0.5, hR*0.14, hR*0.28,-0.25, 0, Math.PI*2); cx.fill();
+    // Moustache area
+    cx.fillStyle = 'rgba(20,8,2,0.35)';
+    cx.beginPath(); cx.ellipse(ox, my - hR*0.16, hR*0.26, hR*0.09, 0, 0, Math.PI*2); cx.fill();
+    // Dot texture
+    cx.fillStyle = 'rgba(18,8,2,0.55)';
+    for(let i=0;i<20;i++){
+      cx.fillRect(ox - hR*0.38 + i*hR*0.04, hy + hR*0.6 + Math.sin(i*1.9)*hR*0.12, 1.4, 1.4);
     }
 
     // Shoulder patch - tiger
     cx.fillStyle='#7a5525'; cx.fillRect(ox+(dir>0?12:-22),fy-54,14,9);
     cx.fillStyle='#e8a060'; cx.fillRect(ox+(dir>0?14:-20),fy-52,10,5);
-  } else {
-    // Enemy face - angry
-    cx.fillStyle='#cc2200';
-    cx.beginPath(); cx.arc(ox-5,fy-74,2.5,0,Math.PI*2); cx.fill();
-    cx.beginPath(); cx.arc(ox+5,fy-74,2.5,0,Math.PI*2); cx.fill();
-    cx.strokeStyle='#661100'; cx.lineWidth=2;
-    cx.beginPath(); cx.arc(ox,fy-67,5,Math.PI+0.3,Math.PI*2-0.3); cx.stroke();
-    cx.fillStyle='#1a1810';
-    cx.save(); cx.translate(ox-7,fy-80); cx.rotate(0.35); cx.fillRect(0,0,14,2.5); cx.restore();
-    cx.save(); cx.translate(ox+7,fy-80); cx.rotate(-0.35); cx.fillRect(-12,0,14,2.5); cx.restore();
-  }
 
-  // Helmet
-  cx.fillStyle=HC;
-  cx.beginPath(); cx.arc(ox,fy-74-hR*0.4,(hR+3),Math.PI,Math.PI*2); cx.fill();
-  cx.fillRect(ox-(hR+4),fy-74-hR*0.4,(hR+4)*2,8);
-  if(!isEnemy){
-    // IDF star
-    cx.fillStyle='#7a9060';
-    cx.beginPath();
-    for(let i=0;i<6;i++){
-      const a=(i/6)*Math.PI*2-Math.PI/2, r=i%2===0?5:2.5;
-      i===0?cx.moveTo(ox+Math.cos(a)*r,fy-88+Math.sin(a)*r):cx.lineTo(ox+Math.cos(a)*r,fy-88+Math.sin(a)*r);
-    }
-    cx.closePath(); cx.fill();
-    // Strap
-    cx.strokeStyle='#2a3a18'; cx.lineWidth=1.5;
-    cx.beginPath(); cx.moveTo(ox-(hR+2),fy-66); cx.quadraticCurveTo(ox,fy-56,ox+(hR+2),fy-66); cx.stroke();
+  } else {
+    // ── ENEMY FACE (small, angry) ────────────────────────────────
+    cx.fillStyle='#cc2200';
+    cx.beginPath(); cx.arc(ox-5,hy+2,2.5,0,Math.PI*2); cx.fill();
+    cx.beginPath(); cx.arc(ox+5,hy+2,2.5,0,Math.PI*2); cx.fill();
+    cx.strokeStyle='#661100'; cx.lineWidth=2;
+    cx.beginPath(); cx.arc(ox,hy+9,5,Math.PI+0.3,Math.PI*2-0.3); cx.stroke();
+    cx.fillStyle='#1a1810';
+    cx.save(); cx.translate(ox-7,hy-4); cx.rotate(0.35); cx.fillRect(0,0,14,2.5); cx.restore();
+    cx.save(); cx.translate(ox+7,hy-4); cx.rotate(-0.35); cx.fillRect(-12,0,14,2.5); cx.restore();
+
+    // Enemy helmet
+    cx.fillStyle=HC;
+    cx.beginPath(); cx.arc(ox,hy,hR+3,Math.PI,Math.PI*2); cx.fill();
+    cx.fillRect(ox-(hR+4),hy,(hR+4)*2,8);
   }
 }
 
