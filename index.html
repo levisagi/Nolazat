@@ -243,27 +243,80 @@ function drawSoldier(ox,fy,dir,state,fr,isEnemy=false){
 
   // BIG HEAD (player bigger than enemy)
   const hR=isEnemy?15:20;
-  cx.fillStyle=SK;
+  // Olive/Mediterranean skin tone
+  const faceSK = isEnemy ? SK : '#c8986a';
+  cx.fillStyle=faceSK;
   cx.beginPath(); cx.arc(ox,fy-70-hR*0.4,hR+2,0,Math.PI*2); cx.fill();
 
   if(!isEnemy){
-    // Face details - friendly/smiling
-    // Eyes
+    const hy = fy-70-hR*0.4; // head center Y
+    // --- Dark short hair on top (visible under helmet) ---
+    cx.fillStyle='#1a1008';
+    cx.beginPath(); cx.arc(ox,hy,hR+2,Math.PI*0.75,Math.PI*0.25,true); cx.fill();
+    // Slightly wavy hair texture
+    cx.fillStyle='#2a1a10';
+    cx.fillRect(ox-8,hy-hR,5,4); cx.fillRect(ox-2,hy-hR-2,6,4); cx.fillRect(ox+5,hy-hR,5,4);
+
+    // --- Eyes (dark brown, almond shape) ---
     const eOff=dir>0?6:-6;
-    cx.fillStyle='#1a1a1a';
-    cx.beginPath(); cx.arc(ox+eOff,fy-74,3.2,0,Math.PI*2); cx.fill();
-    cx.beginPath(); cx.arc(ox-eOff*0.4,fy-74,3.2,0,Math.PI*2); cx.fill();
-    cx.fillStyle='#fff'; cx.fillRect(ox+eOff+1,fy-76,2,2); cx.fillRect(ox-eOff*0.4+1,fy-76,2,2);
-    // Smile
-    cx.strokeStyle='#7a3a3a'; cx.lineWidth=2;
-    cx.beginPath(); cx.arc(ox,fy-67,8,0.1,Math.PI-0.1); cx.stroke();
-    // Stubble
-    cx.fillStyle='#9a7055';
-    for(let i=0;i<8;i++) cx.fillRect(ox-8+i*3.2,fy-64,1.5,1.5);
-    // Brows
-    cx.fillStyle='#3a2010';
-    cx.fillRect(ox+eOff-5,fy-80,10,2.5);
-    cx.fillRect(ox-eOff*0.4-5,fy-80,10,2.5);
+    // Eye whites
+    cx.fillStyle='#f5f0e8';
+    cx.beginPath(); cx.ellipse(ox+eOff,hy+4,4.5,3,0,0,Math.PI*2); cx.fill();
+    cx.beginPath(); cx.ellipse(ox-eOff*0.4,hy+4,4.5,3,0,0,Math.PI*2); cx.fill();
+    // Iris - dark brown
+    cx.fillStyle='#3a2008';
+    cx.beginPath(); cx.arc(ox+eOff,hy+4,2.8,0,Math.PI*2); cx.fill();
+    cx.beginPath(); cx.arc(ox-eOff*0.4,hy+4,2.8,0,Math.PI*2); cx.fill();
+    // Pupil
+    cx.fillStyle='#0a0805';
+    cx.beginPath(); cx.arc(ox+eOff,hy+4,1.6,0,Math.PI*2); cx.fill();
+    cx.beginPath(); cx.arc(ox-eOff*0.4,hy+4,1.6,0,Math.PI*2); cx.fill();
+    // Eye shine
+    cx.fillStyle='rgba(255,255,255,0.85)';
+    cx.beginPath(); cx.arc(ox+eOff+1.2,hy+3,0.9,0,Math.PI*2); cx.fill();
+    cx.beginPath(); cx.arc(ox-eOff*0.4+1.2,hy+3,0.9,0,Math.PI*2); cx.fill();
+
+    // --- Thick dark eyebrows ---
+    cx.fillStyle='#1a0e05';
+    cx.beginPath(); cx.ellipse(ox+eOff,hy-2,6,2.2,dir>0?0.1:-0.1,0,Math.PI*2); cx.fill();
+    cx.beginPath(); cx.ellipse(ox-eOff*0.4,hy-2,6,2.2,dir>0?-0.1:0.1,0,Math.PI*2); cx.fill();
+
+    // --- Big open smile with teeth (חיוך גדול!) ---
+    // Mouth opening
+    cx.fillStyle='#5a1a1a';
+    cx.beginPath();
+    cx.ellipse(ox,hy+13,9,5.5,0,0,Math.PI); cx.fill();
+    // Teeth (white strip)
+    cx.fillStyle='#f8f8f0';
+    cx.beginPath();
+    cx.ellipse(ox,hy+11,8,3.5,0,0,Math.PI); cx.fill();
+    // Tooth line
+    cx.strokeStyle='#ddd8c8'; cx.lineWidth=0.8;
+    cx.beginPath(); cx.moveTo(ox,hy+9); cx.lineTo(ox,hy+14); cx.stroke();
+    cx.beginPath(); cx.moveTo(ox-4,hy+9); cx.lineTo(ox-4,hy+13.5); cx.stroke();
+    cx.beginPath(); cx.moveTo(ox+4,hy+9); cx.lineTo(ox+4,hy+13.5); cx.stroke();
+    // Smile cheek lines
+    cx.strokeStyle='rgba(160,80,50,0.4)'; cx.lineWidth=1.5;
+    cx.beginPath(); cx.arc(ox-11,hy+10,5,Math.PI*1.4,Math.PI*1.9); cx.stroke();
+    cx.beginPath(); cx.arc(ox+11,hy+10,5,Math.PI*1.1,Math.PI*1.6); cx.stroke();
+
+    // --- Stubble / short beard (dark) ---
+    cx.fillStyle='rgba(30,15,5,0.55)';
+    // Chin area
+    cx.beginPath(); cx.ellipse(ox,hy+18,9,5,0,0,Math.PI*2); cx.fill();
+    // Jawline sides
+    cx.beginPath(); cx.ellipse(ox-10,hy+12,4,6,0.3,0,Math.PI*2); cx.fill();
+    cx.beginPath(); cx.ellipse(ox+10,hy+12,4,6,-0.3,0,Math.PI*2); cx.fill();
+    // Above lip
+    cx.fillStyle='rgba(25,12,3,0.4)';
+    cx.beginPath(); cx.ellipse(ox,hy+8,7,2,0,0,Math.PI*2); cx.fill();
+    // Stubble dots
+    cx.fillStyle='rgba(20,10,2,0.5)';
+    for(let i=0;i<14;i++){
+      const sx=ox-10+i*1.6, sy=hy+14+Math.sin(i*2.3)*3;
+      cx.fillRect(sx,sy,1.2,1.2);
+    }
+
     // Shoulder patch - tiger
     cx.fillStyle='#7a5525'; cx.fillRect(ox+(dir>0?12:-22),fy-54,14,9);
     cx.fillStyle='#e8a060'; cx.fillRect(ox+(dir>0?14:-20),fy-52,10,5);
