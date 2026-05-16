@@ -194,7 +194,7 @@ let boss2Hp=15, boss2MaxHp=15, plrBoss2Hp=20, boss2IntroT=0;
 let boss3Hp=15, boss3MaxHp=15, plrBoss3Hp=20, boss3IntroT=0;
 let eSpawnT=0, cSpawnT=0;
 let victoryMsgT=0, weddingT=0, amirEpilogueT=0;
-let weddingParticles=[];
+let weddingParticles=[], weddingTeethSpawned=false;
 
 const BOSS2_SPEECHES=[
   'אורר תוריד לי קופון אני מוותר לך!!',
@@ -1916,14 +1916,48 @@ function drawBalloon(cx2,cy2,sz,color){
   cx.strokeStyle='rgba(120,80,40,0.5)'; cx.lineWidth=1;
   cx.beginPath(); cx.moveTo(cx2,cy2+sz); cx.lineTo(cx2+Math.sin(cy2*0.1)*5,cy2+sz+20); cx.stroke();
 }
+function sfxTooth(){
+  if(!AC) return;
+  // Teeth clinking on floor - short high pings
+  [1800,2200,1600,2600,2000].forEach((f,i)=>tone(f,'sine',0.06,0.12,i*0.07));
+}
+function drawTooth(cx2,cy2,sz,rot){
+  cx.save(); cx.translate(cx2,cy2); cx.rotate(rot);
+  cx.fillStyle='#f4f2e8'; cx.strokeStyle='#c8c0a8'; cx.lineWidth=1;
+  cx.beginPath();
+  cx.moveTo(-sz*0.35,-sz*0.7);
+  cx.bezierCurveTo(-sz*0.5,-sz*0.2, -sz*0.48,sz*0.3, -sz*0.28,sz*0.65);
+  cx.bezierCurveTo(-sz*0.1,sz*0.9, sz*0.1,sz*0.9, sz*0.28,sz*0.65);
+  cx.bezierCurveTo(sz*0.48,sz*0.3, sz*0.5,-sz*0.2, sz*0.35,-sz*0.7);
+  cx.bezierCurveTo(sz*0.2,-sz*1.1, -sz*0.2,-sz*1.1, -sz*0.35,-sz*0.7);
+  cx.closePath(); cx.fill(); cx.stroke();
+  // Shine
+  cx.fillStyle='rgba(255,255,255,0.55)';
+  cx.beginPath(); cx.ellipse(-sz*0.1,-sz*0.3,sz*0.12,sz*0.28,-0.2,0,Math.PI*2); cx.fill();
+  cx.restore();
+}
 function updWeddingParticles(){
-  weddingParticles.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy*=0.998;p.life--;});
+  weddingParticles.forEach(p=>{
+    if(p.type==='tooth'){
+      if(!p.onFloor){
+        p.x+=p.vx; p.y+=p.vy; p.vy+=0.38; p.rot+=p.spin;
+        if(p.y>=p.floorY){
+          p.y=p.floorY; p.vy*=-0.28; p.vx*=0.65; p.spin*=0.5;
+          if(Math.abs(p.vy)<0.8) p.onFloor=true;
+        }
+      }
+    } else {
+      p.x+=p.vx; p.y+=p.vy; p.vy*=0.998;
+    }
+    p.life--;
+  });
   weddingParticles=weddingParticles.filter(p=>p.life>0&&p.y>-60);
 }
 function drawWeddingParticles(){
   weddingParticles.forEach(p=>{
     cx.save(); cx.globalAlpha=Math.min(1,p.life/p.maxL)*0.9;
     if(p.type==='heart') drawHeart(p.x,p.y,p.sz,p.color);
+    else if(p.type==='tooth') drawTooth(p.x,p.y,p.sz,p.rot);
     else drawBalloon(p.x,p.y,p.sz,p.color);
     cx.restore();
   });
@@ -1983,14 +2017,13 @@ function drawVictoryMsg(){
 function drawWeddingScene(){
   const elapsed=900-weddingT; // 0..900
   drawWeddingHall();
-  // Small side characters (clapping) - all 4 game characters
+  // Small side characters (clapping)
   const sideChars=[
     {x:60, y:GH-130, fn:(x,y)=>drawSoldier(x,y,1,'idle',Math.floor(elapsed/8)%20,false), s:0.45},
     {x:110, y:GH-130, fn:(x,y)=>drawBossSprite(x,y,1), s:0.38},
     {x:GW-110, y:GH-130, fn:(x,y)=>drawBoss2Sprite(x,y,-1), s:0.38},
     {x:GW-60, y:GH-130, fn:(x,y)=>drawBoss3Sprite(x,y,-1), s:0.38},
   ];
-  // Enemy soldiers in background clapping
   [140,170,200,GW-140,GW-170,GW-200].forEach((sx,i)=>{
     cx.save(); cx.scale(0.35,0.35);
     drawSoldier(sx/0.35,(GH-130)/0.35,i<3?1:-1,'idle',Math.floor(elapsed/10+i*5)%20,true);
@@ -1998,48 +2031,83 @@ function drawWeddingScene(){
   });
   sideChars.forEach(sc=>{
     cx.save(); cx.translate(sc.x,sc.y); cx.scale(sc.s,sc.s);
-    sc.fn(0,0);
-    cx.restore();
+    sc.fn(0,0); cx.restore();
   });
-  // Chuppah
   drawChuppah();
-  // Rabbi in background (small)
   cx.save(); cx.globalAlpha=0.7;
   drawRabbi(GW/2,GH-170,0.7);
   cx.restore();
-  // Phase: bride & groom walking
-  const brideStartX = GW+60, brideEndX = GW/2+30;
-  const groomStartX = -60, groomEndX = GW/2-30;
+
+  // Bride & groom positions
+  const brideStartX=GW+60, brideEndX=GW/2+30;
+  const groomStartX=-60, groomEndX=GW/2-30;
   let brideX, groomX;
-  if(elapsed<180){
-    brideX=brideStartX; groomX=groomStartX;
-  } else if(elapsed<480){
+  if(elapsed<180){ brideX=brideStartX; groomX=groomStartX; }
+  else if(elapsed<480){
     const t=Math.min(1,(elapsed-180)/300);
     brideX=brideStartX+(brideEndX-brideStartX)*t;
     groomX=groomStartX+(groomEndX-groomStartX)*t;
-  } else {
-    brideX=brideEndX; groomX=groomEndX;
-  }
+  } else { brideX=brideEndX; groomX=groomEndX; }
   drawGroom(groomX,GH-130,0.72);
   drawBride(brideX,GH-130,0.72);
-  // Phase: giant heart + text (frames 480+)
+
+  // Giant heart (480+)
   if(elapsed>=480){
-    const heartAlpha=Math.min(1,(elapsed-480)/60);
-    cx.save(); cx.globalAlpha=heartAlpha;
-    drawGiantHeart();
+    const ha=Math.min(1,(elapsed-480)/60);
+    cx.save(); cx.globalAlpha=ha; drawGiantHeart(); cx.restore();
+  }
+
+  // TEETH FALL (540) — spawn 6 teeth simultaneously from groom's mouth
+  if(elapsed>=540 && !weddingTeethSpawned){
+    weddingTeethSpawned=true;
+    sfxTooth();
+    const tx=groomEndX, ty=GH-182;
+    for(let i=0;i<6;i++){
+      const a=-Math.PI*0.85+(Math.random())*Math.PI*0.7;
+      const sp=2.5+Math.random()*3.8;
+      weddingParticles.push({
+        x:tx+(Math.random()-0.5)*8, y:ty,
+        vx:Math.cos(a)*sp*(i%2===0?1:0.6),
+        vy:Math.sin(a)*sp-2,
+        type:'tooth', color:'#f4f2e8',
+        sz:5+Math.random()*4,
+        life:500, maxL:500,
+        rot:Math.random()*Math.PI*2,
+        spin:(Math.random()-0.5)*0.22,
+        onFloor:false, floorY:GH-136
+      });
+    }
+  }
+
+  // Bride speech (600-719): "אורר אוררר מה קרה??"
+  if(elapsed>=600 && elapsed<720){
+    const a=Math.min(1,(elapsed-600)/20);
+    cx.save(); cx.globalAlpha=a;
+    speech(brideEndX+10, GH-230, 'אורר אוררר מה קרה??');
     cx.restore();
   }
-  // Phase: rabbi speech (frames 720+)
-  if(elapsed>=720){
-    const spAlpha=Math.min(1,(elapsed-720)/40);
-    cx.save(); cx.globalAlpha=spAlpha;
-    speech(GW/2,GH-340,'שהגענו וקמנו לזמן הזה');
+
+  // Groom reply (720-819): "אתה לא מאמינה, נפלו לי השיניים!!"
+  if(elapsed>=720 && elapsed<820){
+    const a=Math.min(1,(elapsed-720)/20);
+    cx.save(); cx.globalAlpha=a;
+    speech(groomEndX-10, GH-240, 'אתה לא מאמינה, נפלו לי השיניים!!');
     cx.restore();
   }
-  // Wedding particles (hearts + balloons)
+
+  // Rabbi speech (820+): "שאלוהים יעזור לי..."
+  if(elapsed>=820){
+    const a=Math.min(1,(elapsed-820)/25);
+    cx.save(); cx.globalAlpha=a;
+    speech(GW/2, GH-320, 'שאלוהים יעזור לי איזה זוג, שחיינו והגענו לזמן הזה');
+    cx.restore();
+  }
+
+  // Particles (hearts + balloons)
   if(elapsed>60&&FC%8===0) spawnWeddingParticle();
   updWeddingParticles(); drawWeddingParticles();
-  // Countdown (small, bottom right)
+
+  // Countdown
   const sec=Math.ceil(weddingT/60);
   cx.fillStyle='rgba(0,0,0,0.45)'; cx.beginPath(); cx.arc(GW-28,GH-28,20,0,Math.PI*2); cx.fill();
   cx.fillStyle='#ffff88'; cx.font='bold 18px "Courier New"'; cx.textAlign='center';
@@ -2233,7 +2301,7 @@ function loop(){
       drawVictoryMsg();
       victoryMsgT--;
       if(victoryMsgT<=0){
-        GS='wedding'; weddingT=900; weddingParticles=[];
+        GS='wedding'; weddingT=900; weddingParticles=[]; weddingTeethSpawned=false;
         if(AC) sfxWedding();
       }
     } else if(GS==='wedding'){
