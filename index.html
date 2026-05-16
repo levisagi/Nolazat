@@ -101,6 +101,42 @@ function startBG(){
 }
 function stopBG(){ bgOscs.forEach(o=>{try{o.stop();}catch(e){}}); bgOscs=[]; }
 
+function sfxCelebration(){
+  if(!AC) return;
+  const now=AC.currentTime;
+  // Fanfare notes
+  [523,659,784,1047].forEach((f,i)=>tone(f,'square',0.22,0.4,i*0.14));
+  // Crowd cheer (noise burst)
+  const buf=AC.createBuffer(1,AC.sampleRate*0.8,AC.sampleRate);
+  const d=buf.getChannelData(0);
+  for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*0.15*Math.max(0,1-i/d.length*0.5);
+  const src=AC.createBufferSource(),g2=AC.createGain();
+  src.buffer=buf; src.connect(g2); g2.connect(AC.destination);
+  g2.gain.setValueAtTime(0.5,now+0.6); g2.gain.exponentialRampToValueAtTime(0.001,now+1.4);
+  src.start(now+0.6);
+}
+function sfxClap(){
+  if(!AC) return;
+  const now=AC.currentTime;
+  const buf=AC.createBuffer(1,AC.sampleRate*0.12,AC.sampleRate);
+  const d=buf.getChannelData(0);
+  for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.exp(-i/(AC.sampleRate*0.04))*0.5;
+  const src=AC.createBufferSource(),g2=AC.createGain();
+  src.buffer=buf; src.connect(g2); g2.connect(AC.destination);
+  g2.gain.setValueAtTime(0.35,now); src.start(now);
+}
+function sfxWedding(){
+  if(!AC) return;
+  // Wedding march snippet
+  const notes=[392,392,392,311,466,392,311,466,392];
+  const durs=[0.5,0.5,0.5,0.4,0.15,0.5,0.4,0.15,0.7];
+  let t=AC.currentTime+0.1;
+  notes.forEach((f,i)=>{
+    tone(f,'sine',durs[i],0.3,t-AC.currentTime);
+    t+=durs[i]+0.05;
+  });
+}
+
 // ═══════════════════════════════════════════════════════════════
 // INPUT
 // ═══════════════════════════════════════════════════════════════
@@ -157,6 +193,8 @@ let bossHp=15, bossMaxHp=15, plrBossHp=20, bossIntroT=0;
 let boss2Hp=15, boss2MaxHp=15, plrBoss2Hp=20, boss2IntroT=0;
 let boss3Hp=15, boss3MaxHp=15, plrBoss3Hp=20, boss3IntroT=0;
 let eSpawnT=0, cSpawnT=0;
+let victoryMsgT=0, weddingT=0, amirEpilogueT=0;
+let weddingParticles=[];
 
 const BOSS2_SPEECHES=[
   'אורר תוריד לי קופון אני מוותר לך!!',
@@ -1523,7 +1561,7 @@ function updBoss3(){
     if(b.boss) return true;
     if(cRect(b.x,b.y,b.r,BOSS3.x,BOSS3.y,BOSS3.w,BOSS3.h)){
       boss3Hp--; spark(b.x,b.y,'#aaaacc',7);
-      if(boss3Hp<=0){sfxWin();GS='win';stopBG();
+      if(boss3Hp<=0){sfxWin();GS='victoryMsg';victoryMsgT=360;stopBG();weddingParticles=[];
         for(let i=0;i<5;i++) setTimeout(()=>spark(BOSS3.x+BOSS3.w/2+Math.random()*60-30,BOSS3.y+Math.random()*60,['#ffff00','#aaaaff','#ff44ff','#00ffff'][Math.floor(Math.random()*4)],16),i*200);}
       return false;
     }
@@ -1545,6 +1583,511 @@ function updDiff(){
 // ═══════════════════════════════════════════════════════════════
 // SCREENS
 // ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
+// SPRITE: BRIDE (dark wavy hair, white dress, full makeup)
+// ═══════════════════════════════════════════════════════════════
+function drawBride(ox,fy,s=1){
+  cx.save(); cx.translate(ox,fy); cx.scale(s,s);
+  const SK='#d4a882';
+  // Dress (white/ivory, full length)
+  const dg=cx.createLinearGradient(-38,0,38,0);
+  dg.addColorStop(0,'#f0ece0'); dg.addColorStop(0.5,'#fdfaf5'); dg.addColorStop(1,'#f0ece0');
+  cx.fillStyle=dg;
+  cx.beginPath();
+  cx.moveTo(-18,-55);
+  cx.bezierCurveTo(-22,-40, -42,-20, -50,20);
+  cx.lineTo(-55,80); cx.lineTo(55,80);
+  cx.lineTo(50,20);
+  cx.bezierCurveTo(42,-20, 22,-40, 18,-55);
+  cx.closePath(); cx.fill();
+  // Dress lace details
+  cx.strokeStyle='rgba(220,200,180,0.6)'; cx.lineWidth=1;
+  cx.beginPath(); cx.moveTo(-18,-52); cx.bezierCurveTo(-30,-20,-45,10,-50,40); cx.stroke();
+  cx.beginPath(); cx.moveTo(18,-52); cx.bezierCurveTo(30,-20,45,10,50,40); cx.stroke();
+  // Waist sash
+  cx.fillStyle='rgba(240,220,200,0.8)';
+  cx.fillRect(-20,-58,40,12);
+  // Bodice
+  cx.fillStyle='#f8f4ec';
+  cx.beginPath();
+  cx.moveTo(-18,-55); cx.lineTo(-22,-95); cx.lineTo(22,-95); cx.lineTo(18,-55);
+  cx.closePath(); cx.fill();
+  // V-neck detail
+  cx.strokeStyle='rgba(200,180,160,0.7)'; cx.lineWidth=1.5;
+  cx.beginPath(); cx.moveTo(-8,-95); cx.lineTo(0,-82); cx.lineTo(8,-95); cx.stroke();
+  // Arms
+  cx.fillStyle=SK;
+  cx.beginPath(); cx.ellipse(-26,-78,7,22,0.15,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.ellipse(26,-78,7,22,-0.15,0,Math.PI*2); cx.fill();
+  // Bouquet (in hands)
+  cx.fillStyle='#228844'; cx.beginPath(); cx.ellipse(28,-60,8,12,0.4,0,Math.PI*2); cx.fill();
+  ['#ff6688','#ff44aa','#ffaacc','#ff8866'].forEach((c,i)=>{
+    const bx=22+i%2*12, by=-68+(i>1?8:0);
+    cx.fillStyle=c; cx.beginPath(); cx.arc(bx,by,5,0,Math.PI*2); cx.fill();
+  });
+  // NECK
+  cx.fillStyle=SK; cx.fillRect(-6,-103,12,10);
+  // HEAD
+  const hR=26, hy=-103-hR;
+  cx.fillStyle=SK; cx.beginPath(); cx.arc(0,hy,hR,0,Math.PI*2); cx.fill();
+  // DARK WAVY HAIR (long, flowing)
+  const HC='#1a0c06', HC2='#2e1408', HC3='#3d1a08';
+  // Back hair layer (behind head)
+  cx.fillStyle=HC;
+  cx.beginPath();
+  cx.moveTo(-hR*0.8,hy-hR*0.5);
+  cx.bezierCurveTo(-hR*1.8,hy, -hR*2.0,hy+hR*1.5, -hR*1.6,hy+hR*3.5);
+  cx.lineTo(-hR*1.0,hy+hR*3.5);
+  cx.bezierCurveTo(-hR*1.2,hy+hR*1.5,-hR*1.0,hy,-hR*0.2,hy-hR*0.8);
+  cx.closePath(); cx.fill();
+  cx.fillStyle=HC;
+  cx.beginPath();
+  cx.moveTo(hR*0.8,hy-hR*0.5);
+  cx.bezierCurveTo(hR*1.8,hy, hR*2.0,hy+hR*1.5, hR*1.6,hy+hR*3.5);
+  cx.lineTo(hR*1.0,hy+hR*3.5);
+  cx.bezierCurveTo(hR*1.2,hy+hR*1.5,hR*1.0,hy,hR*0.2,hy-hR*0.8);
+  cx.closePath(); cx.fill();
+  // Top hair
+  cx.fillStyle=HC;
+  cx.beginPath(); cx.arc(0,hy,hR+1,Math.PI,Math.PI*2); cx.fill();
+  // Skin re-show on face
+  cx.fillStyle=SK;
+  cx.beginPath(); cx.arc(0,hy,hR,Math.PI*0.05,Math.PI*0.95,false); cx.fill();
+  // Wavy hair texture
+  cx.fillStyle=HC2;
+  [[-hR*0.15,hy-hR*0.82,-0.2],[ hR*0.12,hy-hR*0.85, 0.2],[-hR*0.5,hy-hR*0.68,-0.35],[hR*0.45,hy-hR*0.66,0.35]].forEach(([ex,ey,ang])=>{
+    cx.beginPath(); cx.ellipse(ex,ey,hR*0.25,hR*0.09,ang,0,Math.PI*2); cx.fill();
+  });
+  // Hair highlights (brown streaks)
+  cx.fillStyle=HC3;
+  cx.beginPath(); cx.ellipse(-hR*0.3,hy-hR*0.6,hR*0.08,hR*0.55,-0.1,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.ellipse(hR*0.25,hy-hR*0.62,hR*0.07,hR*0.52,0.1,0,Math.PI*2); cx.fill();
+  // Veil
+  cx.fillStyle='rgba(255,252,248,0.45)';
+  cx.beginPath();
+  cx.moveTo(-hR*0.5,hy-hR*0.9);
+  cx.bezierCurveTo(hR*2,hy, hR*2.5,hy+hR*2, hR*2.2,hy+hR*4);
+  cx.lineTo(hR*2.5,hy+hR*4);
+  cx.bezierCurveTo(hR*2.8,hy+hR*2, hR*2.2,hy-hR*0.3, hR*0.5,hy-hR*0.9);
+  cx.closePath(); cx.fill();
+  // Veil edge
+  cx.strokeStyle='rgba(200,190,180,0.5)'; cx.lineWidth=0.8;
+  cx.beginPath();
+  cx.moveTo(hR*0.5,hy-hR*0.9);
+  cx.bezierCurveTo(hR*2.2,hy-hR*0.3, hR*2.8,hy+hR*2, hR*2.5,hy+hR*4); cx.stroke();
+  // EYES (winged eyeliner, full makeup)
+  const ex1=-hR*0.3, ex2=hR*0.3, ey=hy+hR*0.1;
+  cx.fillStyle='#f8f0e8';
+  cx.beginPath(); cx.ellipse(ex1,ey,hR*0.22,hR*0.14,0,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.ellipse(ex2,ey,hR*0.22,hR*0.14,0,0,Math.PI*2); cx.fill();
+  cx.fillStyle='#2e1206'; cx.beginPath(); cx.arc(ex1,ey,hR*0.12,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.arc(ex2,ey,hR*0.12,0,Math.PI*2); cx.fill();
+  cx.fillStyle='rgba(255,255,255,0.9)';
+  cx.beginPath(); cx.arc(ex1+hR*0.05,ey-hR*0.04,hR*0.04,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.arc(ex2+hR*0.05,ey-hR*0.04,hR*0.04,0,Math.PI*2); cx.fill();
+  // Winged eyeliner
+  cx.strokeStyle='#0a0206'; cx.lineWidth=1.8;
+  cx.beginPath(); cx.moveTo(ex1-hR*0.22,ey); cx.lineTo(ex1+hR*0.22,ey-hR*0.02);
+  cx.lineTo(ex1+hR*0.3,ey-hR*0.1); cx.stroke();
+  cx.beginPath(); cx.moveTo(ex2-hR*0.22,ey); cx.lineTo(ex2+hR*0.22,ey-hR*0.02);
+  cx.lineTo(ex2+hR*0.3,ey-hR*0.1); cx.stroke();
+  // Eyebrows (defined, arched)
+  cx.fillStyle='#1a0a04';
+  cx.beginPath(); cx.ellipse(ex1,ey-hR*0.28,hR*0.22,hR*0.07,-0.18,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.ellipse(ex2,ey-hR*0.28,hR*0.22,hR*0.07, 0.18,0,Math.PI*2); cx.fill();
+  // Full lips (red)
+  const ly=hy+hR*0.52;
+  cx.fillStyle='#cc2244';
+  cx.beginPath(); cx.moveTo(-hR*0.35,ly);
+  cx.bezierCurveTo(-hR*0.25,ly-hR*0.15, -hR*0.08,ly-hR*0.18, 0,ly-hR*0.12);
+  cx.bezierCurveTo(hR*0.08,ly-hR*0.18, hR*0.25,ly-hR*0.15, hR*0.35,ly);
+  cx.bezierCurveTo(hR*0.2,ly+hR*0.2, -hR*0.2,ly+hR*0.2, -hR*0.35,ly);
+  cx.closePath(); cx.fill();
+  cx.strokeStyle='#aa1830'; cx.lineWidth=0.8;
+  cx.beginPath(); cx.moveTo(-hR*0.35,ly); cx.lineTo(hR*0.35,ly); cx.stroke();
+  // Blush
+  cx.save(); cx.globalAlpha=0.22;
+  cx.fillStyle='#ff7788';
+  cx.beginPath(); cx.ellipse(ex1-hR*0.1,ey+hR*0.18,hR*0.22,hR*0.12,0,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.ellipse(ex2+hR*0.1,ey+hR*0.18,hR*0.22,hR*0.12,0,0,Math.PI*2); cx.fill();
+  cx.restore();
+  // Earrings (pearl drops)
+  cx.fillStyle='#f8f4ee';
+  cx.beginPath(); cx.arc(-hR-2,hy+hR*0.1,4,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.arc(hR+2,hy+hR*0.1,4,0,Math.PI*2); cx.fill();
+  // Necklace
+  cx.strokeStyle='#d4af37'; cx.lineWidth=1.5;
+  cx.beginPath(); cx.arc(0,-98,10,0.3,Math.PI-0.3); cx.stroke();
+  cx.fillStyle='#d4af37'; cx.beginPath(); cx.arc(0,-88,2.5,0,Math.PI*2); cx.fill();
+  cx.restore();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SPRITE: GROOM (simple, tuxedo)
+// ═══════════════════════════════════════════════════════════════
+function drawGroom(ox,fy,s=1){
+  cx.save(); cx.translate(ox,fy); cx.scale(s,s);
+  const SK='#c8906a';
+  // Trousers (black)
+  cx.fillStyle='#111118'; cx.fillRect(-14,0,12,44); cx.fillRect(4,0,12,44);
+  // Shoes
+  cx.fillStyle='#0a0a0a'; cx.fillRect(-16,38,18,12); cx.fillRect(2,38,18,12);
+  // Tuxedo jacket
+  cx.fillStyle='#111118'; cx.fillRect(-22,-52,46,56);
+  // White shirt
+  cx.fillStyle='#f8f8f8'; cx.fillRect(-10,-52,20,56);
+  // Bow tie
+  cx.fillStyle='#111'; cx.fillRect(-6,-42,12,5);
+  cx.beginPath(); cx.moveTo(-6,-42); cx.lineTo(-14,-46); cx.lineTo(-14,-38); cx.closePath(); cx.fill();
+  cx.beginPath(); cx.moveTo(6,-42); cx.lineTo(14,-46); cx.lineTo(14,-38); cx.closePath(); cx.fill();
+  // Arms
+  cx.fillStyle='#111118'; cx.fillRect(-36,-50,15,44); cx.fillRect(23,-50,15,44);
+  cx.fillStyle=SK; cx.fillRect(-36,-10,15,10); cx.fillRect(23,-10,15,10);
+  // Neck
+  cx.fillStyle=SK; cx.fillRect(-6,-60,12,10);
+  // Head
+  const hR=22,hy=-60-hR;
+  cx.fillStyle=SK; cx.beginPath(); cx.arc(0,hy,hR,0,Math.PI*2); cx.fill();
+  // Dark hair
+  cx.fillStyle='#1a0c06'; cx.beginPath(); cx.arc(0,hy,hR+1,Math.PI,Math.PI*2); cx.fill();
+  cx.fillStyle=SK; cx.beginPath(); cx.arc(0,hy,hR,Math.PI*0.05,Math.PI*0.95,false); cx.fill();
+  // Eyes, simple
+  cx.fillStyle='#2e1206';
+  cx.beginPath(); cx.arc(-7,hy+4,4,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.arc(7,hy+4,4,0,Math.PI*2); cx.fill();
+  cx.fillStyle='rgba(255,255,255,0.8)';
+  cx.beginPath(); cx.arc(-5,hy+2,1.5,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.arc(9,hy+2,1.5,0,Math.PI*2); cx.fill();
+  // Smile
+  cx.strokeStyle='#8a3520'; cx.lineWidth=2;
+  cx.beginPath(); cx.arc(0,hy+10,8,0.1,Math.PI-0.1); cx.stroke();
+  cx.restore();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SPRITE: RABBI (small background figure)
+// ═══════════════════════════════════════════════════════════════
+function drawRabbi(ox,fy,s=1){
+  cx.save(); cx.translate(ox,fy); cx.scale(s,s);
+  // Black robe
+  cx.fillStyle='#111'; cx.fillRect(-18,-90,36,90);
+  // White shirt cuffs
+  cx.fillStyle='#f0ece0'; cx.fillRect(-22,-55,6,20); cx.fillRect(16,-55,6,20);
+  // Neck + head
+  cx.fillStyle='#d4a882'; cx.fillRect(-5,-100,10,12);
+  cx.beginPath(); cx.arc(0,-118,18,0,Math.PI*2); cx.fill();
+  // Big black hat
+  cx.fillStyle='#0a0a0a';
+  cx.beginPath(); cx.ellipse(0,-130,28,8,0,0,Math.PI*2); cx.fill();
+  cx.fillRect(-18,-165,36,35);
+  cx.beginPath(); cx.ellipse(0,-165,20,6,0,0,Math.PI*2); cx.fill();
+  // White beard
+  cx.fillStyle='#e8e4dc';
+  cx.beginPath(); cx.ellipse(0,-100,14,22,0,0,Math.PI*2); cx.fill();
+  // Siddur (prayer book) in hands
+  cx.fillStyle='#aa2200'; cx.fillRect(-12,-62,24,18);
+  cx.fillStyle='#cc4422'; cx.fillRect(-10,-60,20,14);
+  cx.restore();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DRAW WEDDING HALL BACKGROUND
+// ═══════════════════════════════════════════════════════════════
+function drawWeddingHall(){
+  // Warm hall background
+  const bg=cx.createLinearGradient(0,0,0,GH);
+  bg.addColorStop(0,'#f8f0e0'); bg.addColorStop(0.4,'#f0e4cc'); bg.addColorStop(1,'#e8d8b8');
+  cx.fillStyle=bg; cx.fillRect(0,0,GW,GH);
+  // Walls
+  cx.fillStyle='#ddd0b8'; cx.fillRect(0,0,GW,GH);
+  // Floor
+  const fg=cx.createLinearGradient(0,GH-140,0,GH);
+  fg.addColorStop(0,'#c8b888'); fg.addColorStop(1,'#b8a870');
+  cx.fillStyle=fg; cx.fillRect(0,GH-140,GW,140);
+  // Floor tiles
+  cx.strokeStyle='rgba(150,130,80,0.3)'; cx.lineWidth=1;
+  for(let x=0;x<GW;x+=40) { cx.beginPath(); cx.moveTo(x,GH-140); cx.lineTo(x,GH); cx.stroke(); }
+  for(let y=GH-140;y<GH;y+=40) { cx.beginPath(); cx.moveTo(0,y); cx.lineTo(GW,y); cx.stroke(); }
+  // Decorative wall panels
+  cx.strokeStyle='rgba(160,130,80,0.4)'; cx.lineWidth=2;
+  [[20,30,120,GH-170],[340,30,120,GH-170]].forEach(([x,y,w,h])=>{
+    cx.strokeRect(x,y,w,h); cx.strokeRect(x+8,y+8,w-16,h-16);
+  });
+  // Chandeliers
+  [[GW*0.25,0],[GW*0.75,0]].forEach(([cx2,cy2])=>{
+    // Chain
+    cx.strokeStyle='#c8aa60'; cx.lineWidth=2;
+    cx.beginPath(); cx.moveTo(cx2,0); cx.lineTo(cx2,80); cx.stroke();
+    // Main body
+    cx.fillStyle='#e8c840';
+    cx.beginPath(); cx.ellipse(cx2,90,22,10,0,0,Math.PI*2); cx.fill();
+    // Arms
+    cx.strokeStyle='#d4af37'; cx.lineWidth=2.5;
+    [-40,-20,0,20,40].forEach((dx,i)=>{
+      cx.beginPath(); cx.moveTo(cx2+dx*0.4,90); cx.lineTo(cx2+dx,90+22); cx.stroke();
+      // Candles / lights
+      const lc=`hsl(${45+i*5},100%,${FC%40<20?75:85}%)`;
+      cx.fillStyle=lc; cx.beginPath(); cx.arc(cx2+dx,92+22,5,0,Math.PI*2); cx.fill();
+      cx.fillStyle='rgba(255,240,100,0.3)'; cx.beginPath(); cx.arc(cx2+dx,92+22,12,0,Math.PI*2); cx.fill();
+    });
+  });
+  // Curtains (red velvet)
+  cx.fillStyle='#880022';
+  cx.beginPath(); cx.moveTo(0,0); cx.bezierCurveTo(0,80,80,60,60,GH-140); cx.lineTo(0,GH-140); cx.fill();
+  cx.fillStyle='#660018';
+  cx.beginPath(); cx.moveTo(0,0); cx.bezierCurveTo(20,60,50,80,40,GH-140); cx.lineTo(0,GH-140); cx.fill();
+  cx.fillStyle='#880022';
+  cx.beginPath(); cx.moveTo(GW,0); cx.bezierCurveTo(GW,80,GW-80,60,GW-60,GH-140); cx.lineTo(GW,GH-140); cx.fill();
+  cx.fillStyle='#660018';
+  cx.beginPath(); cx.moveTo(GW,0); cx.bezierCurveTo(GW-20,60,GW-50,80,GW-40,GH-140); cx.lineTo(GW,GH-140); cx.fill();
+  // Gold curtain trim
+  cx.strokeStyle='#d4af37'; cx.lineWidth=3;
+  cx.beginPath(); cx.moveTo(60,0); cx.bezierCurveTo(55,80,75,120,62,GH-140); cx.stroke();
+  cx.beginPath(); cx.moveTo(GW-60,0); cx.bezierCurveTo(GW-55,80,GW-75,120,GW-62,GH-140); cx.stroke();
+  // Light entering from left
+  cx.save(); cx.globalAlpha=0.12; cx.fillStyle='#ffffcc';
+  cx.beginPath(); cx.moveTo(60,0); cx.lineTo(60,GH-140); cx.lineTo(260,GH-140); cx.lineTo(160,0); cx.closePath(); cx.fill();
+  cx.restore();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DRAW CHUPPAH (wedding canopy)
+// ═══════════════════════════════════════════════════════════════
+function drawChuppah(){
+  const cx2=GW/2, cy2=GH-220, w=200, h=100;
+  const left=cx2-w/2, right=cx2+w/2, top=cy2-h;
+  // Date at top
+  cx.fillStyle='#8a6020'; cx.font='bold 18px Arial'; cx.textAlign='center';
+  cx.fillText('20/08/26',cx2,top-12);
+  // Poles (4 corner)
+  cx.strokeStyle='#8a6020'; cx.lineWidth=6;
+  [[left,top],[right,top],[left,cy2+10],[right,cy2+10]].forEach(([px,py])=>{
+    cx.beginPath(); cx.moveTo(px,py); cx.lineTo(px,GH-130); cx.stroke();
+  });
+  // Canopy (white fabric with gold border)
+  cx.fillStyle='rgba(255,252,245,0.92)';
+  cx.fillRect(left,top,w,h);
+  cx.strokeStyle='#d4af37'; cx.lineWidth=3;
+  cx.strokeRect(left,top,w,h);
+  // Fabric folds
+  cx.strokeStyle='rgba(200,180,150,0.5)'; cx.lineWidth=1.5;
+  for(let x=left+20;x<right;x+=20){
+    cx.beginPath(); cx.moveTo(x,top); cx.lineTo(x,top+h); cx.stroke();
+  }
+  // Flower decorations on poles
+  ['#ff88aa','#ffaacc','#ff66bb','#ffbbdd'].forEach((c,i)=>{
+    const px=i<2?left:right;
+    const py=i%2===0?top:top+50;
+    cx.fillStyle=c; cx.beginPath(); cx.arc(px,py,7,0,Math.PI*2); cx.fill();
+  });
+  // Flowers along top canopy edge
+  cx.fillStyle='rgba(255,255,255,0.85)';
+  for(let x=left+10;x<right;x+=22){
+    cx.beginPath(); cx.arc(x,top,6,0,Math.PI*2); cx.fill();
+    cx.fillStyle='#ffaacc'; cx.beginPath(); cx.arc(x,top,3,0,Math.PI*2); cx.fill();
+    cx.fillStyle='rgba(255,255,255,0.85)';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// WEDDING SCENE PARTICLES (hearts + balloons)
+// ═══════════════════════════════════════════════════════════════
+function spawnWeddingParticle(){
+  const type=Math.random()<0.6?'heart':'balloon';
+  const x=Math.random()*GW;
+  const color=['#ff4477','#ff88aa','#ff66cc','#ffaabb','#ff2255'][Math.floor(Math.random()*5)];
+  weddingParticles.push({x,y:GH+20,vx:(Math.random()-0.5)*1.5,vy:-1.5-Math.random()*1.5,type,color,sz:8+Math.random()*12,life:240,maxL:240,rot:Math.random()*Math.PI*2});
+}
+function drawHeart(cx2,cy2,sz,color){
+  cx.fillStyle=color;
+  cx.beginPath();
+  cx.moveTo(cx2,cy2+sz*0.3);
+  cx.bezierCurveTo(cx2-sz,cy2-sz*0.3, cx2-sz,cy2-sz, cx2,cy2-sz*0.5);
+  cx.bezierCurveTo(cx2+sz,cy2-sz, cx2+sz,cy2-sz*0.3, cx2,cy2+sz*0.3);
+  cx.closePath(); cx.fill();
+}
+function drawBalloon(cx2,cy2,sz,color){
+  cx.fillStyle=color;
+  cx.beginPath(); cx.arc(cx2,cy2,sz,0,Math.PI*2); cx.fill();
+  // Shine
+  cx.fillStyle='rgba(255,255,255,0.4)';
+  cx.beginPath(); cx.arc(cx2-sz*0.3,cy2-sz*0.35,sz*0.3,0,Math.PI*2); cx.fill();
+  // String
+  cx.strokeStyle='rgba(120,80,40,0.5)'; cx.lineWidth=1;
+  cx.beginPath(); cx.moveTo(cx2,cy2+sz); cx.lineTo(cx2+Math.sin(cy2*0.1)*5,cy2+sz+20); cx.stroke();
+}
+function updWeddingParticles(){
+  weddingParticles.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy*=0.998;p.life--;});
+  weddingParticles=weddingParticles.filter(p=>p.life>0&&p.y>-60);
+}
+function drawWeddingParticles(){
+  weddingParticles.forEach(p=>{
+    cx.save(); cx.globalAlpha=Math.min(1,p.life/p.maxL)*0.9;
+    if(p.type==='heart') drawHeart(p.x,p.y,p.sz,p.color);
+    else drawBalloon(p.x,p.y,p.sz,p.color);
+    cx.restore();
+  });
+}
+
+// Giant heart balloon with text
+function drawGiantHeart(){
+  const cx2=GW/2, cy2=GH/2-60;
+  const sz=60;
+  // Glow
+  cx.save(); cx.globalAlpha=0.25; cx.fillStyle='#ff4477';
+  drawHeart(cx2,cy2,sz+20,'#ff4477'); cx.restore();
+  // Heart
+  drawHeart(cx2,cy2,sz,'#ff2255');
+  // Text inside
+  cx.fillStyle='#fff'; cx.font='bold 16px Arial'; cx.textAlign='center'; cx.direction='rtl';
+  cx.fillText('אנחנו',cx2,cy2-10);
+  cx.fillText('מתחתנים!!',cx2,cy2+12);
+  cx.direction='ltr';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DRAW VICTORY MESSAGE (state: victoryMsg)
+// ═══════════════════════════════════════════════════════════════
+function drawVictoryMsg(){
+  // Background
+  const bg=cx.createLinearGradient(0,0,0,GH);
+  bg.addColorStop(0,'#0a1a06'); bg.addColorStop(1,'#162808');
+  cx.fillStyle=bg; cx.fillRect(0,0,GW,GH);
+  // Sparkles
+  if(FC%4===0) spark(Math.random()*GW,Math.random()*GH/2,['#ffff00','#00ff88','#ffaa00'][Math.floor(Math.random()*3)],3);
+  updParts(); drawParts();
+  // Overlay glow
+  cx.save(); cx.globalAlpha=0.15+Math.sin(FC*0.05)*0.08; cx.fillStyle='#aaff44';
+  cx.fillRect(0,0,GW,GH); cx.restore();
+  // Main text
+  cx.save(); cx.shadowColor='#00ff55'; cx.shadowBlur=30;
+  cx.fillStyle='#00ff55'; cx.font='bold 34px Arial'; cx.textAlign='center'; cx.direction='rtl';
+  cx.fillText('סוף סוף ניצחתי!',GW/2,GH/2-55);
+  cx.restore();
+  cx.fillStyle='#88ffaa'; cx.font='bold 22px Arial'; cx.textAlign='center'; cx.direction='rtl';
+  cx.fillText('ואספיק להגיע לחתונה',GW/2,GH/2-12);
+  cx.direction='ltr';
+  // Countdown
+  const sec=Math.ceil(victoryMsgT/60);
+  cx.fillStyle='rgba(0,0,0,0.5)'; cx.beginPath(); cx.arc(GW/2,GH/2+75,32,0,Math.PI*2); cx.fill();
+  cx.fillStyle='#ffff44'; cx.font='bold 36px "Courier New"'; cx.textAlign='center';
+  cx.fillText(sec,GW/2,GH/2+88);
+  cx.fillStyle='#aaffaa'; cx.font='12px Arial';
+  cx.fillText('שניות...',GW/2,GH/2+115);
+  cx.textAlign='left';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DRAW WEDDING SCENE (state: wedding)
+// ═══════════════════════════════════════════════════════════════
+function drawWeddingScene(){
+  const elapsed=900-weddingT; // 0..900
+  drawWeddingHall();
+  // Small side characters (clapping) - all 4 game characters
+  const sideChars=[
+    {x:60, y:GH-130, fn:(x,y)=>drawSoldier(x,y,1,'idle',Math.floor(elapsed/8)%20,false), s:0.45},
+    {x:110, y:GH-130, fn:(x,y)=>drawBossSprite(x,y,1), s:0.38},
+    {x:GW-110, y:GH-130, fn:(x,y)=>drawBoss2Sprite(x,y,-1), s:0.38},
+    {x:GW-60, y:GH-130, fn:(x,y)=>drawBoss3Sprite(x,y,-1), s:0.38},
+  ];
+  // Enemy soldiers in background clapping
+  [140,170,200,GW-140,GW-170,GW-200].forEach((sx,i)=>{
+    cx.save(); cx.scale(0.35,0.35);
+    drawSoldier(sx/0.35,(GH-130)/0.35,i<3?1:-1,'idle',Math.floor(elapsed/10+i*5)%20,true);
+    cx.restore();
+  });
+  sideChars.forEach(sc=>{
+    cx.save(); cx.translate(sc.x,sc.y); cx.scale(sc.s,sc.s);
+    sc.fn(0,0);
+    cx.restore();
+  });
+  // Chuppah
+  drawChuppah();
+  // Rabbi in background (small)
+  cx.save(); cx.globalAlpha=0.7;
+  drawRabbi(GW/2,GH-170,0.7);
+  cx.restore();
+  // Phase: bride & groom walking
+  const brideStartX = GW+60, brideEndX = GW/2+30;
+  const groomStartX = -60, groomEndX = GW/2-30;
+  let brideX, groomX;
+  if(elapsed<180){
+    brideX=brideStartX; groomX=groomStartX;
+  } else if(elapsed<480){
+    const t=Math.min(1,(elapsed-180)/300);
+    brideX=brideStartX+(brideEndX-brideStartX)*t;
+    groomX=groomStartX+(groomEndX-groomStartX)*t;
+  } else {
+    brideX=brideEndX; groomX=groomEndX;
+  }
+  drawGroom(groomX,GH-130,0.72);
+  drawBride(brideX,GH-130,0.72);
+  // Phase: giant heart + text (frames 480+)
+  if(elapsed>=480){
+    const heartAlpha=Math.min(1,(elapsed-480)/60);
+    cx.save(); cx.globalAlpha=heartAlpha;
+    drawGiantHeart();
+    cx.restore();
+  }
+  // Phase: rabbi speech (frames 720+)
+  if(elapsed>=720){
+    const spAlpha=Math.min(1,(elapsed-720)/40);
+    cx.save(); cx.globalAlpha=spAlpha;
+    speech(GW/2,GH-340,'שהגענו וקמנו לזמן הזה');
+    cx.restore();
+  }
+  // Wedding particles (hearts + balloons)
+  if(elapsed>60&&FC%8===0) spawnWeddingParticle();
+  updWeddingParticles(); drawWeddingParticles();
+  // Countdown (small, bottom right)
+  const sec=Math.ceil(weddingT/60);
+  cx.fillStyle='rgba(0,0,0,0.45)'; cx.beginPath(); cx.arc(GW-28,GH-28,20,0,Math.PI*2); cx.fill();
+  cx.fillStyle='#ffff88'; cx.font='bold 18px "Courier New"'; cx.textAlign='center';
+  cx.fillText(sec,GW-28,GH-22); cx.textAlign='left';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DRAW AMIR EPILOGUE (state: amirEpilogue)
+// ═══════════════════════════════════════════════════════════════
+function drawAmirEpilogue(){
+  const elapsed=300-amirEpilogueT;
+  // Party background
+  const bg=cx.createLinearGradient(0,0,0,GH);
+  bg.addColorStop(0,'#0a0a30'); bg.addColorStop(1,'#1a1a50');
+  cx.fillStyle=bg; cx.fillRect(0,0,GW,GH);
+  // Flash effect
+  if(FC%15<3){cx.save();cx.globalAlpha=0.1;cx.fillStyle='#ffffff';cx.fillRect(0,0,GW,GH);cx.restore();}
+  // Amir large, centered
+  cx.save(); cx.translate(GW/2,GH/2+60); cx.scale(1.4,1.4);
+  drawBoss2Sprite(0,0,elapsed%30<15?1:-1);
+  cx.restore();
+  // Arm-waving animation (he's yelling)
+  const shake=Math.sin(elapsed*0.4)*4;
+  // Speech bubble 1
+  if(elapsed>=30){
+    const a1=Math.min(1,(elapsed-30)/20);
+    cx.save(); cx.globalAlpha=a1;
+    speech(GW/2+shake,GH/2-220,'אורר כמה שילמת על מנה?!?');
+    cx.restore();
+  }
+  // Speech bubble 2
+  if(elapsed>=120){
+    const a2=Math.min(1,(elapsed-120)/20);
+    cx.save(); cx.globalAlpha=a2;
+    speech(GW/2-shake,GH/2-170,'יקר פה אין לי כסף שתדע לך');
+    cx.restore();
+  }
+  // Countdown
+  if(elapsed>=210){
+    const cd=Math.ceil((300-elapsed)/60);
+    if(cd>0){
+      cx.fillStyle='rgba(0,0,0,0.7)'; cx.beginPath(); cx.arc(GW/2,GH-50,38,0,Math.PI*2); cx.fill();
+      cx.fillStyle='#ff6644'; cx.font='bold 40px "Courier New"'; cx.textAlign='center';
+      cx.fillText(cd,GW/2,GH-35); cx.textAlign='left';
+    }
+  }
+}
+
 function drawMenu(){
   cx.fillStyle='#0d2010'; cx.fillRect(0,0,GW,GH);
   cx.fillStyle='rgba(255,255,255,0.7)';
@@ -1686,6 +2229,21 @@ function loop(){
       cx.globalAlpha=1;
       if(P.spT>0) speech(P.x+P.w/2,P.y-85,P.spTx);
       drawParts(); drawHUD(); drawBoss3HUD();
+    } else if(GS==='victoryMsg'){
+      drawVictoryMsg();
+      victoryMsgT--;
+      if(victoryMsgT<=0){
+        GS='wedding'; weddingT=900; weddingParticles=[];
+        if(AC) sfxWedding();
+      }
+    } else if(GS==='wedding'){
+      drawWeddingScene();
+      weddingT--;
+      if(weddingT<=0){GS='amirEpilogue'; amirEpilogueT=300;}
+    } else if(GS==='amirEpilogue'){
+      drawAmirEpilogue();
+      amirEpilogueT--;
+      if(amirEpilogueT<=0){ weddingParticles=[]; startGame(); }
     } else if(GS==='gameover'){
       drawBG(); updParts(); drawParts(); drawGO();
     } else if(GS==='win'){
