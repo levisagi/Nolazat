@@ -868,35 +868,39 @@ function drawHelicopter(cx2,cy2,dir){
 
 function drawBoss2Sprite(ox,fy,dir){
   const SK='#c8906a', HR='#1a0c06';
-  // Suit legs (dark trousers)
-  cx.fillStyle='#1a1a2a';
+  // Work trousers (dark navy)
+  cx.fillStyle='#1a2040';
   cx.fillRect(ox-20,fy-50,17,46); cx.fillRect(ox+5,fy-50,17,46);
-  // Shoes (shiny black)
-  cx.fillStyle='#0a0a12';
-  cx.fillRect(ox-22,fy-16,24,16); cx.fillRect(ox+0,fy-16,24,16);
-  // Suit jacket (dark charcoal)
-  cx.fillStyle='#1e1e2e'; cx.fillRect(ox-26,fy-102,52,56);
-  // White shirt
-  cx.fillStyle='#f0f0f8';
-  cx.beginPath(); cx.moveTo(ox-8,fy-102); cx.lineTo(ox,fy-88); cx.lineTo(ox+8,fy-102); cx.fill();
-  cx.fillRect(ox-5,fy-88,10,30);
-  // Red tie
-  cx.fillStyle='#aa1122';
-  cx.beginPath(); cx.moveTo(ox-4,fy-90); cx.lineTo(ox+4,fy-90); cx.lineTo(ox+3,fy-65); cx.lineTo(ox,fy-60); cx.lineTo(ox-3,fy-65); cx.closePath(); cx.fill();
-  // Lapels
-  cx.fillStyle='#2a2a3a';
-  cx.beginPath(); cx.moveTo(ox-8,fy-102); cx.lineTo(ox-22,fy-90); cx.lineTo(ox-12,fy-80); cx.lineTo(ox,fy-88); cx.closePath(); cx.fill();
-  cx.beginPath(); cx.moveTo(ox+8,fy-102); cx.lineTo(ox+22,fy-90); cx.lineTo(ox+12,fy-80); cx.lineTo(ox,fy-88); cx.closePath(); cx.fill();
-  // Arms
-  cx.fillStyle='#1e1e2e';
-  cx.fillRect(ox-40,fy-100,16,45); cx.fillRect(ox+26,fy-100,16,45);
+  // Work boots (thick, dark brown)
+  cx.fillStyle='#3a2510';
+  cx.fillRect(ox-23,fy-16,26,16); cx.fillRect(ox-1,fy-16,26,16);
+  cx.fillStyle='#2a1808'; cx.fillRect(ox-23,fy-10,26,10); cx.fillRect(ox-1,fy-10,26,10);
+  // BLUE WORK SHIRT (נתיבי ישראל)
+  cx.fillStyle='#1144bb'; cx.fillRect(ox-30,fy-108,62,62);
+  // Shirt collar (V-neck)
+  cx.fillStyle='#0d38a0';
+  cx.beginPath(); cx.moveTo(ox-8,fy-108); cx.lineTo(ox,fy-95); cx.lineTo(ox+8,fy-108); cx.fill();
+  // Shirt seams / texture
+  cx.strokeStyle='#0d38a0'; cx.lineWidth=1;
+  cx.beginPath(); cx.moveTo(ox,fy-95); cx.lineTo(ox,fy-48); cx.stroke();
+  // Chest pocket
+  cx.fillStyle='#0d38a0'; cx.fillRect(ox+12,fy-100,13,11);
+  cx.strokeStyle='#1a55cc'; cx.lineWidth=0.5; cx.strokeRect(ox+12,fy-100,13,11);
+  // "נתיבי ישראל" in yellow
+  cx.fillStyle='#ffee00'; cx.font='bold 11px Arial'; cx.textAlign='center'; cx.direction='rtl';
+  cx.fillText('נתיבי',ox,fy-82);
+  cx.fillText('ישראל',ox,fy-69);
+  cx.direction='ltr'; cx.textAlign='left';
+  // Blue shirt arms
+  cx.fillStyle='#1144bb';
+  cx.fillRect(ox-45,fy-106,16,52); cx.fillRect(ox+31,fy-106,16,52);
   // Cuffs + hands
-  cx.fillStyle='#f0f0f8'; cx.fillRect(ox-40,fy-60,16,7); cx.fillRect(ox+26,fy-60,16,7);
-  cx.fillStyle=SK; cx.fillRect(ox-40,fy-55,16,12); cx.fillRect(ox+26,fy-55,16,12);
+  cx.fillStyle='#0d38a0'; cx.fillRect(ox-45,fy-60,16,7); cx.fillRect(ox+31,fy-60,16,7);
+  cx.fillStyle=SK; cx.fillRect(ox-45,fy-55,16,12); cx.fillRect(ox+31,fy-55,16,12);
   // Neck
-  cx.fillStyle=SK; cx.fillRect(ox-7,fy-108,14,10);
+  cx.fillStyle=SK; cx.fillRect(ox-7,fy-112,14,10);
   // BIG HEAD
-  const hR=42, hy=fy-108-hR;
+  const hR=42, hy=fy-112-hR;
   cx.fillStyle=SK;
   cx.beginPath(); cx.arc(ox,hy,hR,0,Math.PI*2); cx.fill();
   // Full dark hair on top
@@ -965,6 +969,29 @@ function drawBoss2Sprite(ox,fy,dir){
   // Beard texture dots
   cx.fillStyle='rgba(10,4,1,0.45)';
   for(let i=0;i<22;i++) cx.fillRect(ox-hR*0.55+i*hR*0.055,hy+hR*0.55+Math.sin(i*1.8)*hR*0.14,1.5,1.5);
+
+  // ── ORANGE CONSTRUCTION HARD HAT (כובע פועלים) ──────────────
+  const hatC='#ff8800', hatD='#cc5500', hatL='rgba(255,200,90,0.55)';
+  const hatY=hy-hR+8; // brim base sits just on top of head
+  // Dome (filled half-circle)
+  cx.fillStyle=hatC;
+  cx.beginPath(); cx.arc(ox,hatY,hR*1.1,Math.PI,Math.PI*2); cx.fill();
+  // Dome highlight (sheen on top-left)
+  cx.fillStyle=hatL;
+  cx.beginPath(); cx.ellipse(ox-hR*0.28,hatY-hR*0.58,hR*0.42,hR*0.16,-0.3,0,Math.PI*2); cx.fill();
+  // Hat band at dome base
+  cx.fillStyle=hatD;
+  cx.beginPath(); cx.ellipse(ox,hatY,hR*1.1,hR*0.13,0,Math.PI,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.ellipse(ox,hatY,hR*1.1,hR*0.13,0,0,Math.PI*2); cx.fill();
+  // Flat brim (wider ellipse, top surface)
+  cx.fillStyle=hatC;
+  cx.beginPath(); cx.ellipse(ox,hatY,hR*1.5,hR*0.22,0,0,Math.PI*2); cx.fill();
+  // Brim underside shadow
+  cx.fillStyle=hatD;
+  cx.beginPath(); cx.ellipse(ox,hatY+hR*0.08,hR*1.48,hR*0.18,0,0,Math.PI*2); cx.fill();
+  // Brim top edge highlight
+  cx.fillStyle='rgba(255,200,100,0.4)';
+  cx.beginPath(); cx.ellipse(ox,hatY-hR*0.04,hR*1.48,hR*0.14,0,Math.PI,Math.PI*2); cx.fill();
 }
 
 function drawCoupon(b){
